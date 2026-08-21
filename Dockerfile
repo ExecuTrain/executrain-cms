@@ -1,36 +1,45 @@
-# ============================================================================
-# ExecuTrain CMS - Dockerfile
-# React (Vite) build -> static served by nginx
-# ============================================================================
-
-# ---------- Build stage ----------
-FROM node:24-slim AS build
-
-# VITE_API_URL di-pass dari docker-compose (build arg)
-ARG VITE_API_URL=/api/v2
-ENV VITE_API_URL=$VITE_API_URL
+# ---- Stage 1: Build the Vite SPA ----
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Cache layer: install dependencies dulu
-COPY package.json package-lock.json* ./
-RUN npm install
+# Install dependencies.
+# NOTE: npm install (not npm ci) because this project depends on
+# platform-specific optional packages (rolldown/tailwindcss native bindings,
+# @emnapi/*) that differ between the Windows host where the lockfile is
+# committed and the Alpine build container. npm install resolves the correct
+# Alpine/linux variants, while npm ci would fail on the missing entries.
+COPY package.json package-lock.json ./
+RUN npm install --no-audit --no-fund
 
-# Copy source
+# Copy source and build.
+# VITE_API_URL is baked into the bundle at build time.
+# Vite auto-loads .env, so it works out of the box.
+# Override it with a Docker build arg if your production API URL differs.
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 COPY . .
-
-# Build produksi (tsc + vite build -> dist/)
 RUN npm run build
 
-# ---------- Runtime stage ----------
-FROM nginx:alpine AS runtime
+# Install lightweight static file server (runtime dependency)
+RUN npm install serve@14
 
-# Nginx config: SPA fallback + proxy /api ke service API
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# ---- Stage 2: Runtime ----
+FROM node:22-alpine AS runtime
 
-# Copy hasil build ke root html nginx
-COPY --from=build /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-EXPOSE 80
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-CMD ["nginx", "-g", "daemon off;"]
+# Copy built assets and the serve binary
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+
+EXPOSE 3000
+
+# serve handles SPA fallback automatically (rewrites unknown routes to index.html)
+CMD ["npx", "serve", "dist", "-s", "-l", "3000"]
