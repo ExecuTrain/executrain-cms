@@ -1,0 +1,73 @@
+@import 'tailwindcss';
+
+:root {
+  font-family: 'Montserrat Variable', Arial, Helvetica, sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: #f9fafb;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Primary brand color palette (ExecuTrain red) */
+@theme {
+  --color-primary-50: #fbeef1;
+  --color-primary-100: #f6d8de;
+  --color-primary-200: #edb1bd;
+  --color-primary-300: #e08a9c;
+  --color-primary-400: #d3627b;
+  --color-primary-500: #be0f34;
+  --color-primary-600: #ab0d2f;
+  --color-primary-700: #960b2a;
+  --color-primary-800: #820a24;
+  --color-primary-900: #6e081f;
+}
+
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@utility animate-spin-slow {
+  animation: spin-slow 10s linear infinite;
+}
+
+/* Form label & input sizing — apply to all modules */
+.ant-form-item {
+  margin-bottom: 16px;
+}
+.ant-form-item-label > label {
+  font-size: 0.75rem !important;
+  color: #374151 !important;
+}
+.ant-form-item-label > label::after {
+  content: '' !important;
+}
+.ant-input,
+.ant-input-password,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-select,
+.ant-picker {
+  font-size: 0.8125rem !important;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
