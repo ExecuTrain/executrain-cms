@@ -6,38 +6,57 @@ import { useAuth } from '@/lib/auth'
 import { colors } from '@/lib/constants'
 import { DefaultMenu, SuperMenu, type MenuItem } from '@/lib/menu'
 
-// Flatten menu items to get all items with href
-const flattenMenuItems = (menu: MenuItem[]): MenuItem[] => {
-  const result: MenuItem[] = []
-  menu.forEach((item) => {
-    if (item.href && item.href !== '/') {
-      result.push(item)
-    }
-    if (item.children) {
-      item.children.forEach((child) => {
-        if (child.href) {
-          result.push(child)
-        }
-      })
-    }
-  })
-  return result
+/**
+ * Kartu menu tunggal.
+ * - item: menu yang dirender
+ * - color: warna aksen (dipakai icon + background icon)
+ */
+function MenuCard({ item, color }: { item: MenuItem; color: string }) {
+  const Icon = item.icon
+  return (
+    <Link
+      to={item.href || '#'}
+      key={item.id}
+      className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-lg hover:border-gray-300 transition-all"
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-700">{item.text}</p>
+        </div>
+        {Icon && (
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center"
+            style={{ backgroundColor: `${color}20` }}
+          >
+            <Icon className="w-6 h-6" style={{ color }} />
+          </div>
+        )}
+      </div>
+    </Link>
+  )
 }
 
 export default function Dashboard() {
   const { state } = useAuth()
-  const [menuList, setMenuList] = useState<MenuItem[]>(
-    flattenMenuItems(DefaultMenu),
-  )
+  const [menuList, setMenuList] = useState<MenuItem[]>(DefaultMenu)
 
   useEffect(() => {
     if (state.user && state.user.role === 'SUPERADMIN') {
-      setMenuList(flattenMenuItems(SuperMenu))
+      setMenuList(SuperMenu)
     }
   }, [state])
 
+  // Menu tanpa children → kartu standalone (Home, Users)
+  const standaloneMenus = menuList.filter(
+    (m) => m.href && (!m.children || m.children.length === 0),
+  )
+  // Menu dengan children → grup (Catalog, Master Data, Tech Solution, Insight)
+  const groupedMenus = menuList.filter(
+    (m) => m.children && m.children.length > 0,
+  )
+
   return (
-    <div className="space-y-8 flex flex-col items-center justify-center min-h-[90dvh]">
+    <div className="flex flex-col items-center gap-8 min-h-[90dvh] pt-10 pb-10">
       <div className="flex flex-col items-center">
         <div>
           <Image src="/logo-colored.png" alt="logo" width={500} height={200} />
@@ -47,33 +66,52 @@ export default function Dashboard() {
           Company Profile Here
         </p>
       </div>
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
-        {menuList.map((menu: MenuItem, index: number) => {
-          const Icon = menu.icon
-          const iconColor = colors[index % colors.length]
+
+      <div className="space-y-8 w-full">
+        {/* Standalone menus */}
+        {standaloneMenus.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
+            {standaloneMenus.map((menu, index) => (
+              <MenuCard
+                key={menu.id}
+                item={menu}
+                color={colors[index % colors.length]}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Grouped menus — samakan mapping dengan sidebar */}
+        {groupedMenus.map((group, groupIndex) => {
+          const GroupIcon = group.icon
+          const groupColor = colors[groupIndex % colors.length]
           return (
-            <Link
-              to={menu.href || '#'}
-              key={menu.id}
-              className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-lg hover:border-gray-300 transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-700">
-                    {menu.text}
-                  </p>
-                </div>
-                {Icon && (
+            <section key={group.id} className="w-full">
+              <div className="flex items-center gap-2 mb-3">
+                {GroupIcon && (
                   <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: `${iconColor}20` }}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: `${groupColor}20` }}
                   >
-                    <Icon className="w-6 h-6" style={{ color: iconColor }} />
+                    <GroupIcon
+                      className="w-4 h-4"
+                      style={{ color: groupColor }}
+                    />
                   </div>
                 )}
+                <h2 className="text-sm font-semibold text-gray-900">
+                  {group.text}
+                </h2>
+                <span className="text-xs text-gray-400">
+                  {group.children?.length ?? 0} menu
+                </span>
               </div>
-            </Link>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
+                {group.children?.map((child) => (
+                  <MenuCard key={child.id} item={child} color={groupColor} />
+                ))}
+              </div>
+            </section>
           )
         })}
       </div>

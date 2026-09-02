@@ -1,100 +1,100 @@
-import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
-import { Form } from 'antd'
-import { Search, Plus, Edit, Trash2 } from 'lucide-react'
-import dayjs from 'dayjs'
+import { useState } from "react";
+import { Navigate } from "react-router-dom";
+import { Form } from "antd";
+import { Search, Plus, Edit, Trash2 } from "lucide-react";
+import dayjs from "dayjs";
 
-import InputForm from '@/components/Form'
-import Notification from '@/components/Notification'
-import { useAuth } from '@/lib/auth'
-import { useDebounce } from '@/hooks/useDebounce'
-import { useUser, useRegister, useDelete, useUpdate } from '@/hooks/useUsers'
+import InputForm from "@/components/Form";
+import Notification from "@/components/Notification";
+import { useAuth } from "@/lib/auth";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useUser, useRegister, useDelete, useUpdate } from "@/hooks/useUsers";
 
 export default function UsersPage() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [show, setShow] = useState<'NONE' | 'ADD' | 'UPDATE'>('NONE')
-  const [formAction, setFormAction] = useState<any>()
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [show, setShow] = useState<"NONE" | "ADD" | "UPDATE">("NONE");
+  const [formAction, setFormAction] = useState<any>();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
 
-  const debouncedSearchName = useDebounce(searchTerm, 500)
+  const debouncedSearchName = useDebounce(searchTerm, 500);
 
-  const { state } = useAuth()
-  const [form] = Form.useForm()
+  const { state } = useAuth();
+  const [form] = Form.useForm();
 
-  const { data = [], isLoading, refetch } = useUser(debouncedSearchName)
-  const { mutate: registerUser, isPending: registerPending } = useRegister()
-  const { mutate: updateUser, isPending: updatePending } = useUpdate()
-  const { mutate: deleteUser, isPending: deletePending } = useDelete()
+  const { data = [], isLoading, refetch } = useUser(debouncedSearchName);
+  const { mutate: registerUser, isPending: registerPending } = useRegister();
+  const { mutate: updateUser, isPending: updatePending } = useUpdate();
+  const { mutate: deleteUser, isPending: deletePending } = useDelete();
 
   const handleAddUser = async () => {
     try {
-      await form.validateFields()
+      await form.validateFields();
 
       if (formAction.retype_password !== formAction.password)
-        return Notification('error', 'Password Not Match')
+        return Notification("error", "Password Not Match");
 
       registerUser(formAction, {
         onSuccess: () => {
-          Notification('success', 'Success to Register User')
-          setShow('NONE')
-          form.resetFields()
-          setFormAction(undefined)
-          refetch()
+          Notification("success", "Success to Register User");
+          setShow("NONE");
+          form.resetFields();
+          setFormAction(undefined);
+          refetch();
         },
         onError: () => {
-          Notification('error', 'Failed to Register User')
+          Notification("error", "Failed to Register User");
         },
-      })
+      });
     } catch (e) {
-      Notification('error', 'Server Error')
+      Notification("error", "Server Error");
     }
-  }
+  };
 
   const handleUpdateUser = async () => {
     try {
-      await form.validateFields()
+      await form.validateFields();
 
       if (
         formAction.password &&
         formAction.retype_password !== formAction.password
       )
-        return Notification('error', 'Password Not Match')
+        return Notification("error", "Password Not Match");
 
       updateUser(formAction, {
         onSuccess: () => {
-          Notification('success', 'Success to Update User')
-          setShow('NONE')
-          form.resetFields()
-          setFormAction(undefined)
-          refetch()
+          Notification("success", "Success to Update User");
+          setShow("NONE");
+          form.resetFields();
+          setFormAction(undefined);
+          refetch();
         },
         onError: () => {
-          Notification('error', 'Failed to Update User')
+          Notification("error", "Failed to Update User");
         },
-      })
+      });
     } catch (e) {
-      Notification('error', 'Server Error')
+      Notification("error", "Server Error");
     }
-  }
+  };
 
   const handleDeleteUser = async (id: string) => {
     deleteUser(id, {
       onSuccess: () => {
-        Notification('success', 'Success to Delete User')
-        refetch()
-        setShowDeleteModal(false)
-        setSelectedUser(null)
+        Notification("success", "Success to Delete User");
+        refetch();
+        setShowDeleteModal(false);
+        setSelectedUser(null);
       },
       onError: () => {
-        Notification('error', 'Failed to Delete User')
+        Notification("error", "Failed to Delete User");
       },
-    })
-  }
+    });
+  };
 
   // Guard: hanya SUPERADMIN yang boleh akses halaman ini
-  if (!state.user || state.user.role !== 'SUPERADMIN') {
-    return <Navigate to="/" replace />
+  if (!state.user || state.user.role !== "SUPERADMIN") {
+    return <Navigate to="/" replace />;
   }
 
   return (
@@ -108,7 +108,7 @@ export default function UsersPage() {
           </p>
         </div>
         <button
-          onClick={() => setShow('ADD')}
+          onClick={() => setShow("ADD")}
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -130,7 +130,7 @@ export default function UsersPage() {
             />
             {searchTerm && (
               <button
-                onClick={() => setSearchTerm('')}
+                onClick={() => setSearchTerm("")}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-700"
               >
                 ✕
@@ -140,7 +140,7 @@ export default function UsersPage() {
         </div>
         {debouncedSearchName && (
           <p className="text-xs text-gray-600 mt-2">
-            Searching for:{' '}
+            Searching for:{" "}
             <span className="font-medium">{debouncedSearchName}</span>
           </p>
         )}
@@ -174,8 +174,8 @@ export default function UsersPage() {
                   <tr>
                     <td colSpan={4} className="py-8 text-center text-gray-600">
                       {debouncedSearchName
-                        ? 'No users found matching your search'
-                        : 'No users found'}
+                        ? "No users found matching your search"
+                        : "No users found"}
                     </td>
                   </tr>
                 ) : (
@@ -190,7 +190,7 @@ export default function UsersPage() {
                             <span className="text-white font-medium text-xs">
                               {user?.display_name
                                 ? user?.display_name[0]?.toUpperCase()
-                                : 'U'}
+                                : "U"}
                             </span>
                           </div>
                           <div>
@@ -198,35 +198,35 @@ export default function UsersPage() {
                               {user.display_name}
                             </p>
                             <p className="text-xs text-gray-600 capitalize">
-                              {user?.username?.toLowerCase() || '-'}
+                              {user?.username?.toLowerCase() || "-"}
                             </p>
                           </div>
                         </div>
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium ${
-                            user.role === 'Admin'
-                              ? 'bg-purple-900/50 text-purple-300'
-                              : user.role === 'SUPERADMIN'
-                                ? 'bg-primary-900/50 text-primary-300'
-                                : 'bg-gray-100 text-gray-700'
+                          className={`inline-flex rounded-full text-[11px] py-2 px-4 font-medium ${
+                            user.role === "Admin"
+                              ? "bg-purple-900/50 text-purple-300"
+                              : user.role === "SUPERADMIN"
+                                ? "bg-primary-900 text-white"
+                                : "bg-gray-100 text-gray-700"
                           }`}
                         >
                           {user?.role}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-xs text-gray-600">
-                        {dayjs(user.created_at).format('DD MMMM YYYY')}
+                        {dayjs(user.created_at).format("DD MMMM YYYY")}
                       </td>
-                      {user?.role !== 'SUPERADMIN' ? (
+                      {user?.role !== "SUPERADMIN" ? (
                         <td className="py-3 px-4">
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => {
-                                setShow('UPDATE')
-                                setFormAction(user)
-                                form.setFieldsValue(user)
+                                setShow("UPDATE");
+                                setFormAction(user);
+                                form.setFieldsValue(user);
                               }}
                               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                             >
@@ -234,8 +234,8 @@ export default function UsersPage() {
                             </button>
                             <button
                               onClick={() => {
-                                setSelectedUser(user)
-                                setShowDeleteModal(true)
+                                setSelectedUser(user);
+                                setShowDeleteModal(true);
                               }}
                               type="button"
                               className="p-2 hover:bg-red-50 rounded-lg transition-colors"
@@ -257,7 +257,7 @@ export default function UsersPage() {
       )}
 
       {/* Add User Modal */}
-      {show === 'ADD' && (
+      {show === "ADD" && (
         <div className="fixed bg-black/40 flex items-center justify-center z-50 p-4 top-0 right-0 left-0 bottom-0 m-0">
           <div className="bg-white rounded-2xl p-5 w-full max-w-md">
             <h2 className="text-base font-bold text-gray-900 mb-4">
@@ -304,7 +304,7 @@ export default function UsersPage() {
               <div className="flex gap-3 mt-4">
                 <button
                   type="button"
-                  onClick={() => setShow('NONE')}
+                  onClick={() => setShow("NONE")}
                   className="flex-1 px-4 py-1.5 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   Cancel
@@ -315,7 +315,7 @@ export default function UsersPage() {
                   disabled={registerPending}
                   className="flex-1 px-4 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
                 >
-                  {registerPending ? 'Loading...' : 'Add User'}
+                  {registerPending ? "Loading..." : "Add User"}
                 </button>
               </div>
             </Form>
@@ -323,7 +323,7 @@ export default function UsersPage() {
         </div>
       )}
 
-      {show === 'UPDATE' && (
+      {show === "UPDATE" && (
         <div className="fixed bg-black/40 flex items-center justify-center z-50 p-4 top-0 right-0 left-0 bottom-0 m-0">
           <div className="bg-white rounded-2xl p-5 w-full max-w-md">
             <h2 className="text-base font-bold text-gray-900 mb-4">
@@ -371,7 +371,7 @@ export default function UsersPage() {
               <div className="flex gap-3 mt-4">
                 <button
                   type="button"
-                  onClick={() => setShow('NONE')}
+                  onClick={() => setShow("NONE")}
                   className="flex-1 px-4 py-1.5 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   Cancel
@@ -382,7 +382,7 @@ export default function UsersPage() {
                   disabled={updatePending}
                   className="flex-1 px-4 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
                 >
-                  {updatePending ? 'Loading...' : 'Update User'}
+                  {updatePending ? "Loading..." : "Update User"}
                 </button>
               </div>
             </Form>
@@ -411,8 +411,8 @@ export default function UsersPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setShowDeleteModal(false)
-                  setSelectedUser(null)
+                  setShowDeleteModal(false);
+                  setSelectedUser(null);
                 }}
                 className="flex-1 px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
                 disabled={deletePending}
@@ -425,12 +425,12 @@ export default function UsersPage() {
                 className="flex-1 px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={deletePending}
               >
-                {deletePending ? 'Deleting...' : 'Delete'}
+                {deletePending ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }
