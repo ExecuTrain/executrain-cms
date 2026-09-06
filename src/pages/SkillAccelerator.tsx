@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { Navigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Search, Plus, BookOpen, Users, Clock, Globe } from 'lucide-react'
 import dayjs from 'dayjs'
 
 import Notification from '@/components/Notification'
 import Image from '@/components/Image'
-import { useAuth } from '@/lib/auth'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useSkillAccelerator, useSkillAcceleratorDelete } from '@/hooks/useSkillAccelerator'
 import { useMasterDataByType } from '@/hooks/useMasterData'
@@ -24,7 +23,6 @@ export default function SkillAcceleratorPage() {
 
   const debouncedSearchName = useDebounce(searchTerm, 500)
 
-  const { state } = useAuth()
   const { data = [], isLoading, refetch } = useSkillAccelerator(debouncedSearchName)
   const { mutate: deleteItem, isPending: deletePending } = useSkillAcceleratorDelete()
 
@@ -41,10 +39,6 @@ export default function SkillAcceleratorPage() {
         Notification('error', 'Failed to Delete Skill Accelerator')
       },
     })
-  }
-
-  if (!state.user || state.user.role !== 'SUPERADMIN') {
-    return <Navigate to="/" replace />
   }
 
   return (

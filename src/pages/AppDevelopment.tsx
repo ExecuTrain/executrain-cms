@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { Navigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Search, Plus, Layers, Clock, ShieldCheck } from 'lucide-react'
 import dayjs from 'dayjs'
 
 import Notification from '@/components/Notification'
-import { useAuth } from '@/lib/auth'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useAppDevelopment, useAppDevelopmentDelete } from '@/hooks/useAppDevelopment'
 import { useMasterDataByType } from '@/hooks/useMasterData'
@@ -21,7 +20,6 @@ export default function AppDevelopmentPage() {
 
   const debouncedSearchName = useDebounce(searchTerm, 500)
 
-  const { state } = useAuth()
   const { data = [], isLoading, refetch } = useAppDevelopment(debouncedSearchName)
   const { mutate: deleteItem, isPending: deletePending } = useAppDevelopmentDelete()
   const { data: techData } = useMasterDataByType('APP_TECH_STACK')
@@ -42,10 +40,6 @@ export default function AppDevelopmentPage() {
         Notification('error', 'Failed to Delete App Development')
       },
     })
-  }
-
-  if (!state.user || state.user.role !== 'SUPERADMIN') {
-    return <Navigate to="/" replace />
   }
 
   return (

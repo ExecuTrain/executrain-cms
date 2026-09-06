@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Navigate, useNavigate, useParams, Link } from 'react-router-dom'
+import { useNavigate, useParams, Link } from 'react-router-dom'
 import { Form } from 'antd'
 import { ArrowLeft } from 'lucide-react'
 
@@ -7,7 +7,6 @@ import InputForm from '@/components/Form'
 import Notification from '@/components/Notification'
 import HighlightList from '@/components/HighlightList'
 import TeamSizeList from '@/components/TeamSizeList'
-import { useAuth } from '@/lib/auth'
 import {
   useAppDevelopmentCreate,
   useAppDevelopmentUpdate,
@@ -22,7 +21,6 @@ export default function AppDevelopmentFormPage() {
   const [formAction, setFormAction] = useState<any>()
   const [form] = Form.useForm()
   const navigate = useNavigate()
-  const { state } = useAuth()
 
   const { data: detailData, isLoading: detailLoading } = useAppDevelopmentDetail(
     isEdit ? id : undefined,
@@ -122,10 +120,6 @@ export default function AppDevelopmentFormPage() {
     } catch (e) {
       Notification('error', 'Please fill all required fields')
     }
-  }
-
-  if (!state.user || state.user.role !== 'SUPERADMIN') {
-    return <Navigate to="/" replace />
   }
 
   return (

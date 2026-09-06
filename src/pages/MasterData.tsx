@@ -3,7 +3,6 @@ import { Plus, Pencil, Trash2, X, ChevronRight, ArrowLeft, Database } from 'luci
 import { useEffect, useState } from 'react'
 
 import Notification from '@/components/Notification'
-import { useAuth } from '@/lib/auth'
 import {
   useMasterDataByType,
   useMasterDataCreate,
@@ -78,7 +77,6 @@ function MasterDataTypePage() {
   const [form, setForm] = useState(emptyForm)
   const [confirmDelete, setConfirmDelete] = useState<any>(null)
 
-  const { state } = useAuth()
   const { data, isLoading, refetch } = useMasterDataByType(meta?.type)
   const { mutate: createItem, isPending: createPending } = useMasterDataCreate()
   const { mutate: updateItem, isPending: updatePending } = useMasterDataUpdate()
@@ -154,10 +152,6 @@ function MasterDataTypePage() {
       },
       onError: () => Notification('error', 'Failed to Delete Master Data'),
     })
-  }
-
-  if (!state.user || state.user.role !== 'SUPERADMIN') {
-    return <Navigate to="/" replace />
   }
 
   if (!meta) {

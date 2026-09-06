@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { Navigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Search, Plus, GraduationCap, Users, Clock, Globe } from 'lucide-react'
 import dayjs from 'dayjs'
 
 import Notification from '@/components/Notification'
 import Image from '@/components/Image'
-import { useAuth } from '@/lib/auth'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useCourse, useCourseDelete } from '@/hooks/useCourse'
 import { useMasterDataByType } from '@/hooks/useMasterData'
@@ -22,7 +21,6 @@ export default function CoursePage() {
 
   const debouncedSearchName = useDebounce(searchTerm, 500)
 
-  const { state } = useAuth()
   const { data = [], isLoading, refetch } = useCourse(debouncedSearchName)
   const { mutate: deleteItem, isPending: deletePending } = useCourseDelete()
   const { data: categoryData } = useMasterDataByType('COURSE_CATEGORY')
@@ -41,10 +39,6 @@ export default function CoursePage() {
         Notification('error', 'Failed to Delete Course')
       },
     })
-  }
-
-  if (!state.user || state.user.role !== 'SUPERADMIN') {
-    return <Navigate to="/" replace />
   }
 
   return (

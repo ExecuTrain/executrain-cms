@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 
 import { Login, type LoginPayload } from '@/services/auth'
@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth'
 
 export const useLogin = () => {
   const { actions } = useAuth()
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationKey: ['login'],
@@ -22,6 +23,9 @@ export const useLogin = () => {
       }
     },
     onSuccess: (data) => {
+      // Bersihkan cache query (mis. my-menus user sebelumnya) supaya menu
+      // user baru di-fetch ulang dan tidak bocor antar akun.
+      queryClient.clear()
       actions.setAuth(data.user, data.token)
     },
   })
@@ -30,6 +34,7 @@ export const useLogin = () => {
 export const useLogout = () => {
   const { actions } = useAuth()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationKey: ['logout'],
@@ -42,6 +47,7 @@ export const useLogout = () => {
       }
     },
     onSettled: () => {
+      queryClient.clear()
       actions.logout()
       navigate('/login')
     },

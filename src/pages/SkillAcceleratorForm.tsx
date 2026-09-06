@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Navigate, useNavigate, useParams, Link } from 'react-router-dom'
+import { useNavigate, useParams, Link } from 'react-router-dom'
 import { Form } from 'antd'
 import { ArrowLeft } from 'lucide-react'
 
@@ -7,7 +7,6 @@ import InputForm from '@/components/Form'
 import Notification from '@/components/Notification'
 import ImageUpload from '@/components/ImageUpload'
 import FeatureList from '@/components/FeatureList'
-import { useAuth } from '@/lib/auth'
 import {
   useSkillAcceleratorCreate,
   useSkillAcceleratorUpdate,
@@ -34,7 +33,6 @@ export default function SkillAcceleratorFormPage() {
   const [formAction, setFormAction] = useState<any>()
   const [form] = Form.useForm()
   const navigate = useNavigate()
-  const { state } = useAuth()
 
   const { data: detailData, isLoading: detailLoading } = useSkillAcceleratorDetail(
     isEdit ? id : undefined,
@@ -113,10 +111,6 @@ export default function SkillAcceleratorFormPage() {
     } catch (e) {
       Notification('error', 'Please fill all required fields')
     }
-  }
-
-  if (!state.user || state.user.role !== 'SUPERADMIN') {
-    return <Navigate to="/" replace />
   }
 
   return (

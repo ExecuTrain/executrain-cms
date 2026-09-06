@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 
 import Image from '@/components/Image'
 import { useAuth } from '@/lib/auth'
+import { useMyMenus } from '@/hooks/useAccess'
+import { buildMenuFromTree, type MenuItem } from '@/lib/menu'
 import { colors } from '@/lib/constants'
-import { DefaultMenu, SuperMenu, type MenuItem } from '@/lib/menu'
 
 /**
  * Kartu menu tunggal.
@@ -36,21 +37,26 @@ function MenuCard({ item, color }: { item: MenuItem; color: string }) {
   )
 }
 
+/**
+ * Dashboard menampilkan menu sesuai role user (diambil dari my-menus,
+ * sama seperti sidebar). Role non-super hanya melihat menu yang diizinkan.
+ */
 export default function Dashboard() {
   const { state } = useAuth()
-  const [menuList, setMenuList] = useState<MenuItem[]>(DefaultMenu)
+  const { data: myMenus, isFetched } = useMyMenus()
+  const [menuList, setMenuList] = useState<MenuItem[]>([])
 
   useEffect(() => {
-    if (state.user && state.user.role === 'SUPERADMIN') {
-      setMenuList(SuperMenu)
+    if (isFetched && myMenus && myMenus.menus.length > 0) {
+      setMenuList(buildMenuFromTree(myMenus.menus))
     }
-  }, [state])
+  }, [isFetched, myMenus])
 
-  // Menu tanpa children → kartu standalone (Home, Users)
+  // Menu tanpa children → kartu standalone (Home, Users, Content, Master Data)
   const standaloneMenus = menuList.filter(
     (m) => m.href && (!m.children || m.children.length === 0),
   )
-  // Menu dengan children → grup (Catalog, Master Data, Tech Solution, Insight)
+  // Menu dengan children → grup (Catalog, Tech Solution, Insight)
   const groupedMenus = menuList.filter(
     (m) => m.children && m.children.length > 0,
   )
@@ -67,54 +73,58 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <div className="space-y-8 w-full">
-        {/* Standalone menus */}
-        {standaloneMenus.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
-            {standaloneMenus.map((menu, index) => (
-              <MenuCard
-                key={menu.id}
-                item={menu}
-                color={colors[index % colors.length]}
-              />
-            ))}
-          </div>
-        )}
+      {!isFetched ? (
+        <div className="animate-pulse bg-gray-100 w-full min-h-[40dvh] rounded-2xl" />
+      ) : (
+        <div className="space-y-8 w-full">
+          {/* Standalone menus */}
+          {standaloneMenus.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
+              {standaloneMenus.map((menu, index) => (
+                <MenuCard
+                  key={menu.id}
+                  item={menu}
+                  color={colors[index % colors.length]}
+                />
+              ))}
+            </div>
+          )}
 
-        {/* Grouped menus — samakan mapping dengan sidebar */}
-        {groupedMenus.map((group, groupIndex) => {
-          const GroupIcon = group.icon
-          const groupColor = colors[groupIndex % colors.length]
-          return (
-            <section key={group.id} className="w-full">
-              <div className="flex items-center gap-2 mb-3">
-                {GroupIcon && (
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: `${groupColor}20` }}
-                  >
-                    <GroupIcon
-                      className="w-4 h-4"
-                      style={{ color: groupColor }}
-                    />
-                  </div>
-                )}
-                <h2 className="text-sm font-semibold text-gray-900">
-                  {group.text}
-                </h2>
-                <span className="text-xs text-gray-400">
-                  {group.children?.length ?? 0} menu
-                </span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
-                {group.children?.map((child) => (
-                  <MenuCard key={child.id} item={child} color={groupColor} />
-                ))}
-              </div>
-            </section>
-          )
-        })}
-      </div>
+          {/* Grouped menus — samakan mapping dengan sidebar */}
+          {groupedMenus.map((group, groupIndex) => {
+            const GroupIcon = group.icon
+            const groupColor = colors[groupIndex % colors.length]
+            return (
+              <section key={group.id} className="w-full">
+                <div className="flex items-center gap-2 mb-3">
+                  {GroupIcon && (
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center"
+                      style={{ backgroundColor: `${groupColor}20` }}
+                    >
+                      <GroupIcon
+                        className="w-4 h-4"
+                        style={{ color: groupColor }}
+                      />
+                    </div>
+                  )}
+                  <h2 className="text-sm font-semibold text-gray-900">
+                    {group.text}
+                  </h2>
+                  <span className="text-xs text-gray-400">
+                    {group.children?.length ?? 0} menu
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
+                  {group.children?.map((child) => (
+                    <MenuCard key={child.id} item={child} color={groupColor} />
+                  ))}
+                </div>
+              </section>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

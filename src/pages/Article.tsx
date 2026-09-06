@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { Navigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Search, Plus, Newspaper, CalendarDays } from 'lucide-react'
 import dayjs from 'dayjs'
 
 import Notification from '@/components/Notification'
-import { useAuth } from '@/lib/auth'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useArticle, useArticleDelete } from '@/hooks/useArticle'
 import { useMasterDataByType } from '@/hooks/useMasterData'
@@ -27,7 +26,6 @@ export default function ArticlePage() {
 
   const debouncedSearchName = useDebounce(searchTerm, 500)
 
-  const { state } = useAuth()
   const { data = [], isLoading, refetch } = useArticle(debouncedSearchName)
   const { mutate: deleteItem, isPending: deletePending } = useArticleDelete()
   const { data: catData } = useMasterDataByType('ARTICLE_CATEGORY')
@@ -46,10 +44,6 @@ export default function ArticlePage() {
         Notification('error', 'Failed to Delete Article')
       },
     })
-  }
-
-  if (!state.user || state.user.role !== 'SUPERADMIN') {
-    return <Navigate to="/" replace />
   }
 
   return (

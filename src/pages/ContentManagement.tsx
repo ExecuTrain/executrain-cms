@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
 
-import { useAuth } from '@/lib/auth'
+
+
 import StatisticsTab from '@/pages/content-tabs/StatisticsTab'
 import PartnersTab from '@/pages/content-tabs/PartnersTab'
 import TestimonialsTab from '@/pages/content-tabs/TestimonialsTab'
@@ -22,11 +22,6 @@ const tabs = [
 
 export default function ContentManagementPage() {
   const [activeTab, setActiveTab] = useState('statistics')
-  const { state } = useAuth()
-
-  if (!state.user || state.user.role !== 'SUPERADMIN') {
-    return <Navigate to="/" replace />
-  }
 
   return (
     <div className="flex flex-col gap-5">

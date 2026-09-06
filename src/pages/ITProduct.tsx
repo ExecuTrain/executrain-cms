@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { Navigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Search, Plus, Cpu, Link2, ShieldCheck } from 'lucide-react'
 import dayjs from 'dayjs'
 
 import Notification from '@/components/Notification'
 import Image from '@/components/Image'
-import { useAuth } from '@/lib/auth'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useITProduct, useITProductDelete } from '@/hooks/useITProduct'
 import { useMasterDataByType } from '@/hooks/useMasterData'
@@ -22,7 +21,6 @@ export default function ITProductPage() {
 
   const debouncedSearchName = useDebounce(searchTerm, 500)
 
-  const { state } = useAuth()
   const { data = [], isLoading, refetch } = useITProduct(debouncedSearchName)
   const { mutate: deleteItem, isPending: deletePending } = useITProductDelete()
   const { data: techData } = useMasterDataByType('TECH_STACK')
@@ -41,10 +39,6 @@ export default function ITProductPage() {
         Notification('error', 'Failed to Delete IT Product')
       },
     })
-  }
-
-  if (!state.user || state.user.role !== 'SUPERADMIN') {
-    return <Navigate to="/" replace />
   }
 
   return (

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Navigate, useNavigate, useParams, Link } from 'react-router-dom'
+import { useNavigate, useParams, Link } from 'react-router-dom'
 import { Form } from 'antd'
 import { ArrowLeft } from 'lucide-react'
 
@@ -8,7 +8,6 @@ import RichTextEditor, {
   extractImageUrls,
 } from '@/components/RichTextEditor'
 import Notification from '@/components/Notification'
-import { useAuth } from '@/lib/auth'
 import {
   useArticleCreate,
   useArticleUpdate,
@@ -28,7 +27,6 @@ export default function ArticleFormPage() {
   const [formAction, setFormAction] = useState<any>()
   const [form] = Form.useForm()
   const navigate = useNavigate()
-  const { state } = useAuth()
   const editorContent = useRef('')
   // URL gambar yang di-upload selama sesi ini (untuk cleanup yang tidak dipakai)
   const uploadedUrls = useRef<Set<string>>(new Set())
@@ -136,10 +134,6 @@ export default function ArticleFormPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  if (!state.user || state.user.role !== 'SUPERADMIN') {
-    return <Navigate to="/" replace />
-  }
 
   return (
     <div className="flex flex-col gap-5">

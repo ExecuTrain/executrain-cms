@@ -1,10 +1,16 @@
-import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 
-import { useAuth } from '@/lib/auth'
-import { useLogout } from '@/hooks/useAuth'
-import { DefaultMenu, SuperMenu, type MenuItem } from '@/lib/menu'
-import Image from '@/components/Image'
+import { useAuth } from "@/lib/auth";
+import { useLogout } from "@/hooks/useAuth";
+import { useMyMenus } from "@/hooks/useAccess";
+import {
+  DefaultMenu,
+  SuperMenu,
+  buildMenuFromTree,
+  type MenuItem,
+} from "@/lib/menu";
+import Image from "@/components/Image";
 
 import {
   LogOut,
@@ -13,73 +19,83 @@ import {
   MoveLeft,
   ChevronDown,
   ChevronRight,
-} from 'lucide-react'
+} from "lucide-react";
 
 export default function Sidebar() {
-  const { state } = useAuth()
-  const pathname = useLocation().pathname
-  const { mutate: logout, isPending: logoutPending } = useLogout()
+  const { state } = useAuth();
+  const pathname = useLocation().pathname;
+  const { mutate: logout, isPending: logoutPending } = useLogout();
 
-  const [isCollapsed, setIsCollapsed] = useState(true)
-  const [menuList, setMenuList] = useState<MenuItem[]>(DefaultMenu)
-  const [expandedMenus, setExpandedMenus] = useState<Set<number>>(new Set())
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [menuList, setMenuList] = useState<MenuItem[]>(DefaultMenu);
+  const [expandedMenus, setExpandedMenus] = useState<Set<number>>(new Set());
+
+  // Menu dinamis dari server sesuai role user yg login.
+  const { data: myMenus, isFetched } = useMyMenus();
 
   useEffect(() => {
-    if (state.user && state.user.role === 'SUPERADMIN') {
-      setMenuList(SuperMenu)
+    if (isFetched && myMenus) {
+      setMenuList(buildMenuFromTree(myMenus.menus));
+    } else if (isFetched && !myMenus) {
+      // Gagal fetch — fallback berbasis role.
+      if (state.user && state.user.role === "SUPERADMIN") {
+        setMenuList(SuperMenu);
+      } else {
+        setMenuList(DefaultMenu);
+      }
     }
-  }, [state])
+  }, [isFetched, myMenus, state]);
 
   const toggleMenu = (menuId: number) => {
     setExpandedMenus((prev) => {
-      const newSet = new Set(prev)
+      const newSet = new Set(prev);
       if (newSet.has(menuId)) {
-        newSet.delete(menuId)
+        newSet.delete(menuId);
       } else {
-        newSet.add(menuId)
+        newSet.add(menuId);
       }
-      return newSet
-    })
-  }
+      return newSet;
+    });
+  };
 
   const isMenuActive = (item: MenuItem): boolean => {
-    if (item.href && pathname === item.href) return true
+    if (item.href && pathname === item.href) return true;
     if (item.children) {
-      return item.children.some((child) => child.href === pathname)
+      return item.children.some((child) => child.href === pathname);
     }
-    return false
-  }
+    return false;
+  };
 
   const renderMenuItem = (item: MenuItem, level: number = 0) => {
-    const Icon = item.icon
-    const hasChildren = item.children && item.children.length > 0
-    const isActive = isMenuActive(item)
-    const isExpanded = expandedMenus.has(item.id)
+    const Icon = item.icon;
+    const hasChildren = item.children && item.children.length > 0;
+    const isActive = isMenuActive(item);
+    const isExpanded = expandedMenus.has(item.id);
 
     if (hasChildren && isCollapsed) {
       return (
         <button
           key={item.id}
           onClick={() => {
-            setIsCollapsed(false)
-            toggleMenu(item.id)
+            setIsCollapsed(false);
+            toggleMenu(item.id);
           }}
-          className={`flex items-center justify-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 group lg:justify-center lg:px-2 ${
+          className={`flex items-center justify-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 group lg:justify-center lg:px-2 w-full ${
             isActive
-              ? 'bg-primary-50 text-primary-600'
-              : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+              ? "bg-primary-50 text-primary-600"
+              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
           }`}
           title={item.text}
         >
           <Icon
             className={`w-4 h-4 flex-shrink-0 ${
               isActive
-                ? 'text-primary-600'
-                : 'text-gray-500 group-hover:text-gray-700'
+                ? "text-primary-600"
+                : "text-gray-500 group-hover:text-gray-700"
             }`}
           />
         </button>
-      )
+      );
     }
 
     if (hasChildren && !isCollapsed) {
@@ -89,16 +105,16 @@ export default function Sidebar() {
             onClick={() => toggleMenu(item.id)}
             className={`flex items-center justify-between w-full gap-3 px-3 py-2 rounded-xl transition-all duration-200 group ${
               isActive
-                ? 'bg-primary-50 text-primary-600'
-                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                ? "bg-primary-50 text-primary-600"
+                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
             }`}
           >
             <div className="flex items-center gap-3">
               <Icon
                 className={`w-4 h-4 flex-shrink-0 ${
                   isActive
-                    ? 'text-primary-600'
-                    : 'text-gray-500 group-hover:text-gray-700'
+                    ? "text-primary-600"
+                    : "text-gray-500 group-hover:text-gray-700"
                 }`}
               />
               <span className="font-medium text-xs">{item.text}</span>
@@ -116,7 +132,7 @@ export default function Sidebar() {
             </div>
           )}
         </div>
-      )
+      );
     }
 
     if (item.href) {
@@ -126,9 +142,9 @@ export default function Sidebar() {
           to={item.href}
           className={`flex items-center rounded-xl transition-all duration-200 group ${
             isActive
-              ? 'bg-primary-50 text-primary-600'
-              : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-          } ${isCollapsed ? 'justify-center py-2 lg:px-2' : 'px-3 py-2 gap-3'}`}
+              ? "bg-primary-50 text-primary-600"
+              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+          } ${isCollapsed ? "justify-center py-2 lg:px-2" : "px-3 py-2 gap-3"}`}
           title={isCollapsed && level === 0 ? item.text : undefined}
         >
           {level === 0 ? (
@@ -137,12 +153,14 @@ export default function Sidebar() {
                 <Icon
                   className={`w-4 h-4 ${
                     isActive
-                      ? 'text-primary-600'
-                      : 'text-gray-500 group-hover:text-gray-700'
+                      ? "text-primary-600"
+                      : "text-gray-500 group-hover:text-gray-700"
                   }`}
                 />
               )}
-              {!isCollapsed && <span className="font-medium text-xs">{item.text}</span>}
+              {!isCollapsed && (
+                <span className="font-medium text-xs">{item.text}</span>
+              )}
             </>
           ) : (
             <>
@@ -153,11 +171,11 @@ export default function Sidebar() {
             </>
           )}
         </Link>
-      )
+      );
     }
 
-    return null
-  }
+    return null;
+  };
 
   return (
     <>
@@ -172,14 +190,14 @@ export default function Sidebar() {
       {/* Sidebar */}
       <div
         className={`sticky left-0 top-0 h-[100dvh] bg-white border-r border-gray-200 z-50 transition-all duration-300 ${
-          isCollapsed ? '-translate-x-full lg:translate-x-0 lg:w-20' : 'w-64'
+          isCollapsed ? "-translate-x-full lg:translate-x-0 lg:w-20" : "w-64"
         }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div
             className={`flex items-center w-full ${
-              isCollapsed ? 'lg:justify-center' : 'justify-between'
+              isCollapsed ? "lg:justify-center" : "justify-between"
             }`}
           >
             <div className="flex gap-3 items-center">
@@ -231,15 +249,15 @@ export default function Sidebar() {
                 <span className="text-white font-medium text-xs">
                   {state?.user?.display_name
                     ? state?.user?.display_name[0]
-                    : 'A'}
+                    : "A"}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-gray-900 truncate">
-                  {state.user?.display_name || 'User'}
+                  {state.user?.display_name || "User"}
                 </p>
                 <p className="text-[10px] text-gray-500 truncate capitalize">
-                  {state.user?.role?.toLowerCase() || 'user'}
+                  {state.user?.role?.toLowerCase() || "user"}
                 </p>
               </div>
             </div>
@@ -249,7 +267,7 @@ export default function Sidebar() {
             onClick={() => logout()}
             disabled={logoutPending}
             className={`flex items-center gap-3 px-3 py-2 rounded-xl text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200 w-full ${
-              isCollapsed ? 'lg:justify-center lg:px-2' : ''
+              isCollapsed ? "lg:justify-center lg:px-2" : ""
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {logoutPending ? (
@@ -259,7 +277,7 @@ export default function Sidebar() {
             )}
             {!isCollapsed && (
               <span className="font-medium text-xs">
-                {logoutPending ? 'Logging out...' : 'Logout'}
+                {logoutPending ? "Logging out..." : "Logout"}
               </span>
             )}
           </button>
@@ -274,5 +292,5 @@ export default function Sidebar() {
         <Menu className="w-5 h-5 text-gray-600" />
       </button>
     </>
-  )
+  );
 }

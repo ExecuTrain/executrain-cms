@@ -9,6 +9,11 @@ import Notification from "@/components/Notification";
 import { useAuth } from "@/lib/auth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useUser, useRegister, useDelete, useUpdate } from "@/hooks/useUsers";
+import { useRoleOptions } from "@/hooks/useAccess";
+
+/** role dari API bisa berupa object {id,name} atau string (kompatibilitas) */
+const roleNameOf = (role: any): string =>
+  typeof role === "string" ? role : role?.name || "";
 
 export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,6 +26,8 @@ export default function UsersPage() {
 
   const { state } = useAuth();
   const [form] = Form.useForm();
+
+  const { data: roleOptions = [] } = useRoleOptions();
 
   const { data = [], isLoading, refetch } = useUser(debouncedSearchName);
   const { mutate: registerUser, isPending: registerPending } = useRegister();
@@ -55,8 +62,7 @@ export default function UsersPage() {
     try {
       await form.validateFields();
 
-      if (
-        formAction.password &&
+      if (formAction.password &&
         formAction.retype_password !== formAction.password
       )
         return Notification("error", "Password Not Match");
@@ -108,7 +114,11 @@ export default function UsersPage() {
           </p>
         </div>
         <button
-          onClick={() => setShow("ADD")}
+          onClick={() => {
+            setFormAction({});
+            form.resetFields();
+            setShow("ADD");
+          }}
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -206,14 +216,14 @@ export default function UsersPage() {
                       <td className="py-3 px-4">
                         <span
                           className={`inline-flex rounded-full text-[11px] py-2 px-4 font-medium ${
-                            user.role === "Admin"
+                            roleNameOf(user.role) === "ADMIN"
                               ? "bg-purple-900/50 text-purple-300"
-                              : user.role === "SUPERADMIN"
+                              : roleNameOf(user.role) === "SUPERADMIN"
                                 ? "bg-primary-900 text-white"
                                 : "bg-gray-100 text-gray-700"
                           }`}
                         >
-                          {user?.role}
+                          {roleNameOf(user.role)}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-xs text-gray-600">
@@ -225,8 +235,15 @@ export default function UsersPage() {
                             <button
                               onClick={() => {
                                 setShow("UPDATE");
-                                setFormAction(user);
-                                form.setFieldsValue(user);
+                                setFormAction({
+                                  ...user,
+                                  role_id: user.role_id || user.role?.id || undefined,
+                                });
+                                form.setFieldsValue({
+                                  display_name: user.display_name,
+                                  username: user.username,
+                                  role_id: user.role_id || user.role?.id || undefined,
+                                });
                               }}
                               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                             >
@@ -300,6 +317,19 @@ export default function UsersPage() {
                 form={formAction}
                 setForm={(e: any) => setFormAction(e)}
               />
+              <InputForm
+                type="select"
+                name="role_id"
+                label="Role"
+                placeholder="Select role"
+                required
+                form={formAction}
+                setForm={(e: any) => setFormAction(e)}
+                options={roleOptions.map((r: any) => ({
+                  label: r.name,
+                  value: r.id,
+                }))}
+              />
 
               <div className="flex gap-3 mt-4">
                 <button
@@ -313,7 +343,7 @@ export default function UsersPage() {
                   type="button"
                   onClick={() => handleAddUser()}
                   disabled={registerPending}
-                  className="flex-1 px-4 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  className="flex-1 px-4 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
                 >
                   {registerPending ? "Loading..." : "Add User"}
                 </button>
@@ -367,6 +397,20 @@ export default function UsersPage() {
                   setForm={(e: any) => setFormAction(e)}
                 />
               )}
+              <InputForm
+                type="select"
+                name="role_id"
+                label="Role"
+                placeholder="Select role"
+                required
+                disabled={roleNameOf(formAction?.role) === "SUPERADMIN"}
+                form={formAction}
+                setForm={(e: any) => setFormAction(e)}
+                options={roleOptions.map((r: any) => ({
+                  label: r.name,
+                  value: r.id,
+                }))}
+              />
 
               <div className="flex gap-3 mt-4">
                 <button

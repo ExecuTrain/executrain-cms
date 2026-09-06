@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { Navigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Search, Plus, Clock, Quote, Building2, Boxes } from 'lucide-react'
 import dayjs from 'dayjs'
 
 import Notification from '@/components/Notification'
-import { useAuth } from '@/lib/auth'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useCaseStudy, useCaseStudyDelete } from '@/hooks/useCaseStudy'
 import { useMasterDataByType } from '@/hooks/useMasterData'
@@ -21,7 +20,6 @@ export default function CaseStudyPage() {
 
   const debouncedSearchName = useDebounce(searchTerm, 500)
 
-  const { state } = useAuth()
   const { data = [], isLoading, refetch } = useCaseStudy(debouncedSearchName)
   const { mutate: deleteItem, isPending: deletePending } = useCaseStudyDelete()
   const { data: catData } = useMasterDataByType('CASE_CATEGORY')
@@ -46,10 +44,6 @@ export default function CaseStudyPage() {
         Notification('error', 'Failed to Delete Case Study')
       },
     })
-  }
-
-  if (!state.user || state.user.role !== 'SUPERADMIN') {
-    return <Navigate to="/" replace />
   }
 
   return (
