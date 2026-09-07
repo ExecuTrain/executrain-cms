@@ -4,6 +4,7 @@ import {
   BookOpen,
   LayoutGrid,
   GraduationCap,
+  CalendarDays,
   Database,
   Cpu,
   Boxes,
@@ -47,6 +48,7 @@ const MENU_ICONS: Record<string, LucideIcon> = {
   catalog: LayoutGrid,
   'skill-accelerator': BookOpen,
   course: GraduationCap,
+  schedule: CalendarDays,
   'tech-solution': Boxes,
   'it-product': Cpu,
   'app-development': AppWindow,
@@ -141,6 +143,7 @@ export const SuperMenu: MenuItem[] = [
     children: [
       { id: 31, text: 'Skill Accelerator', icon: BookOpen, href: '/skill-accelerator' },
       { id: 32, text: 'Course', icon: GraduationCap, href: '/course' },
+      { id: 33, text: 'Schedule', icon: CalendarDays, href: '/schedule' },
     ],
   },
   {

@@ -35,6 +35,9 @@ import TechnologyCloudLicensingPageContent from '@/pages/TechnologyCloudLicensin
 import HeroOnlyPageContent from '@/pages/HeroOnlyPageContent'
 import PagesIndex from '@/pages/PagesIndex'
 import HomePageContent from '@/pages/HomePageContent'
+import SchedulePage from '@/pages/Schedule'
+import ScheduleFormPage from '@/pages/ScheduleForm'
+import ScheduleImportPage from '@/pages/ScheduleImport'
 
 function PlaceholderPage({ title }: { title: string }) {
   return (
@@ -245,10 +248,41 @@ export default function App() {
             </MenuAccessRoute>
           }
         />
+        <Route
+          path="schedule"
+          element={
+            <MenuAccessRoute path="/schedule">
+              <SchedulePage />
+            </MenuAccessRoute>
+          }
+        />
+        <Route
+          path="schedule/create"
+          element={
+            <MenuAccessRoute path="/schedule">
+              <ScheduleFormPage />
+            </MenuAccessRoute>
+          }
+        />
+        <Route
+          path="schedule/import"
+          element={
+            <MenuAccessRoute path="/schedule">
+              <ScheduleImportPage />
+            </MenuAccessRoute>
+          }
+        />
+        <Route
+          path="schedule/:id/edit"
+          element={
+            <MenuAccessRoute path="/schedule">
+              <ScheduleFormPage />
+            </MenuAccessRoute>
+          }
+        />
         <Route path="services" element={<PlaceholderPage title="Services" />} />
         <Route path="strategic-solution" element={<PlaceholderPage title="Strategic Solution" />} />
         <Route path="free-trial" element={<PlaceholderPage title="Free Trial" />} />
-        <Route path="schedule" element={<PlaceholderPage title="Schedule" />} />
         <Route path="promotion" element={<PlaceholderPage title="Promotion" />} />
         <Route
           path="about"
