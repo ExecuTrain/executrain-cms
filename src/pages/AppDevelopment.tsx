@@ -4,6 +4,7 @@ import { Search, Plus, Layers, Clock, ShieldCheck } from 'lucide-react'
 import dayjs from 'dayjs'
 
 import Notification from '@/components/Notification'
+import { MediaGridSkeleton } from '@/components/Skeletons'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useAppDevelopment, useAppDevelopmentDelete } from '@/hooks/useAppDevelopment'
 import { useMasterDataByType } from '@/hooks/useMasterData'
@@ -93,11 +94,7 @@ export default function AppDevelopmentPage() {
 
       {/* Card Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="animate-pulse bg-gray-100 h-64 rounded-2xl" />
-          ))}
-        </div>
+        <MediaGridSkeleton count={3} />
       ) : data.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 py-12 text-center text-gray-600">
           {debouncedSearchName

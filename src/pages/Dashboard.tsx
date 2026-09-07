@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth'
 import { useMyMenus } from '@/hooks/useAccess'
 import { buildMenuFromTree, type MenuItem } from '@/lib/menu'
 import { colors } from '@/lib/constants'
+import { DashboardSkeleton } from '@/components/Skeletons'
 
 /**
  * Kartu menu tunggal.
@@ -74,7 +75,7 @@ export default function Dashboard() {
       </div>
 
       {!isFetched ? (
-        <div className="animate-pulse bg-gray-100 w-full min-h-[40dvh] rounded-2xl" />
+        <DashboardSkeleton />
       ) : (
         <div className="space-y-8 w-full">
           {/* Standalone menus */}

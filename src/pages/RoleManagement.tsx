@@ -5,6 +5,7 @@ import { Shield, Plus, Pencil, Trash2, Search, Users, CheckCircle2, XCircle } fr
 
 import InputForm from "@/components/Form";
 import Notification from "@/components/Notification";
+import { TableSkeleton } from "@/components/Skeletons";
 import { useAuth } from "@/lib/auth";
 import {
   useRoleList,
@@ -282,7 +283,7 @@ export default function RoleManagementPage() {
   };
 
   if (state.isLoading) {
-    return <div className="animate-pulse bg-gray-100 w-full min-h-[40dvh] rounded-2xl" />;
+    return <TableSkeleton rows={4} cols={4} />;
   }
 
   return (
@@ -322,7 +323,7 @@ export default function RoleManagementPage() {
 
       {/* Roles Table */}
       {isLoading ? (
-        <div className="animate-pulse bg-gray-100 w-full min-h-[30dvh] rounded-2xl" />
+        <TableSkeleton rows={5} cols={5} />
       ) : (
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">

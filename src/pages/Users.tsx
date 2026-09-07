@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 
 import InputForm from "@/components/Form";
 import Notification from "@/components/Notification";
+import { TableSkeleton } from "@/components/Skeletons";
 import { useAuth } from "@/lib/auth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useUser, useRegister, useDelete, useUpdate } from "@/hooks/useUsers";
@@ -158,7 +159,7 @@ export default function UsersPage() {
 
       {/* Users Table */}
       {isLoading ? (
-        <div className="animate-pulse bg-gray-100 w-full min-h-[30dvh] rounded-xl"></div>
+        <TableSkeleton rows={5} cols={4} />
       ) : (
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">

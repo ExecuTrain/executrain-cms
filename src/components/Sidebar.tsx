@@ -11,6 +11,7 @@ import {
   type MenuItem,
 } from "@/lib/menu";
 import Image from "@/components/Image";
+import { SidebarMenuSkeleton } from "@/components/Skeletons";
 
 import {
   LogOut,
@@ -238,7 +239,11 @@ export default function Sidebar() {
 
         {/* Navigation */}
         <nav className="p-4 space-y-2 overflow-auto max-h-[65dvh] custom-scrollbar text-xs">
-          {menuList.map((item: MenuItem) => renderMenuItem(item))}
+          {!isFetched ? (
+            <SidebarMenuSkeleton />
+          ) : (
+            menuList.map((item: MenuItem) => renderMenuItem(item))
+          )}
         </nav>
 
         {/* User Section */}

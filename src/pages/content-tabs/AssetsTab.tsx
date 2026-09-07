@@ -9,6 +9,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import Notification from '@/components/Notification'
+import { SectionCardSkeleton } from '@/components/Skeletons'
 import { useAssets, useUpdateAssetUrl } from '@/hooks/useContentManagement'
 import ImageUpload from '@/components/ImageUpload'
 
@@ -102,9 +103,9 @@ export default function AssetsTab() {
 
   if (isLoading) {
     return (
-      <div className="animate-pulse space-y-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-24 bg-gray-100 rounded-xl"></div>
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <SectionCardSkeleton key={i} fields={2} />
         ))}
       </div>
     )

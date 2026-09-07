@@ -3,6 +3,7 @@ import { FileStack } from 'lucide-react'
 
 import { useMyMenus } from '@/hooks/useAccess'
 import { getMenuIcon, type MenuItem } from '@/lib/menu'
+import { CardGridSkeleton } from '@/components/Skeletons'
 
 /**
  * Halaman index semua halaman CMS (PageContent) — pola yang sama dengan
@@ -30,11 +31,7 @@ export default function PagesIndex() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="animate-pulse bg-gray-100 h-28 rounded-2xl" />
-          ))}
-        </div>
+        <CardGridSkeleton count={6} />
       ) : pages.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 p-10 text-center">
           <FileStack className="w-8 h-8 text-gray-300 mx-auto mb-3" />

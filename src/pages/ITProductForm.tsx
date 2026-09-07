@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react'
 
 import InputForm from '@/components/Form'
 import Notification from '@/components/Notification'
+import { FieldRowsSkeleton } from '@/components/Skeletons'
 import ImageUpload from '@/components/ImageUpload'
 import FeatureList from '@/components/FeatureList'
 import HighlightList from '@/components/HighlightList'
@@ -139,7 +140,7 @@ export default function ITProductFormPage() {
       {/* Form */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
         {isEdit && detailLoading ? (
-          <div className="animate-pulse bg-gray-100 w-full min-h-[40dvh] rounded-xl" />
+          <FieldRowsSkeleton rows={6} />
         ) : (
           <Form form={form} layout="vertical" requiredMark={false}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6">

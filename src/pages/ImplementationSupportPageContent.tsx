@@ -10,6 +10,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import Notification from '@/components/Notification'
+import { ContentPageSkeleton } from '@/components/Skeletons'
 import PageSectionTabs from '@/components/PageSectionTabs'
 import ImageUpload from '@/components/ImageUpload'
 import { usePageDetail, useUpdatePage } from '@/hooks/usePage'
@@ -260,13 +261,7 @@ export default function ImplementationSupportPageContent() {
   }
 
   if (isLoading) {
-    return (
-      <div className="animate-pulse space-y-4">
-        <div className="h-10 bg-gray-100 rounded-xl" />
-        <div className="h-64 bg-gray-100 rounded-2xl" />
-        <div className="h-64 bg-gray-100 rounded-2xl" />
-      </div>
-    )
+    return <ContentPageSkeleton />
   }
 
   return (

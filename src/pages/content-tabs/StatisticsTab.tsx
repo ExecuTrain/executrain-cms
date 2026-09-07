@@ -10,6 +10,7 @@ import {
   GraduationCap,
 } from 'lucide-react'
 import Notification from '@/components/Notification'
+import { SectionCardSkeleton } from '@/components/Skeletons'
 import { useStatistic, useUpdateStatistic } from '@/hooks/useContentManagement'
 
 export default function StatisticsTab() {
@@ -142,9 +143,8 @@ export default function StatisticsTab() {
 
   if (isLoading) {
     return (
-      <div className="animate-pulse space-y-4">
-        <div className="h-32 bg-gray-100 rounded-xl"></div>
-        <div className="h-32 bg-gray-100 rounded-xl"></div>
+      <div className="space-y-4">
+        <SectionCardSkeleton fields={4} />
       </div>
     )
   }

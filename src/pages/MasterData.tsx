@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, X, ChevronRight, ArrowLeft, Database } from 'luci
 import { useEffect, useState } from 'react'
 
 import Notification from '@/components/Notification'
+import { CardGridSkeleton, TableSkeleton } from '@/components/Skeletons'
 import {
   useMasterDataByType,
   useMasterDataCreate,
@@ -32,11 +33,7 @@ function MasterDataIndex() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="animate-pulse bg-gray-100 h-28 rounded-2xl" />
-          ))}
-        </div>
+        <CardGridSkeleton count={6} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {MASTER_DATA_TYPES.map((m) => {
@@ -198,7 +195,7 @@ function MasterDataTypePage() {
         <h2 className="text-sm font-semibold text-gray-900 mb-4">{meta.label}</h2>
 
         {isLoading ? (
-          <div className="animate-pulse bg-gray-100 w-full h-40 rounded-xl" />
+          <TableSkeleton rows={5} cols={3} />
         ) : items.length === 0 ? (
           <div className="py-10 text-center text-gray-600 text-sm">
             No options yet for this type
