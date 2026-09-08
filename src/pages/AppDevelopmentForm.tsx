@@ -8,6 +8,7 @@ import Notification from '@/components/Notification'
 import { FieldRowsSkeleton } from '@/components/Skeletons'
 import HighlightList from '@/components/HighlightList'
 import TeamSizeList from '@/components/TeamSizeList'
+import ImageUpload from '@/components/ImageUpload'
 import {
   useAppDevelopmentCreate,
   useAppDevelopmentUpdate,
@@ -42,6 +43,7 @@ export default function AppDevelopmentFormPage() {
       if (item) {
         const values = {
           title: item.title,
+          banner: item.banner && item.banner.url ? item.banner : null,
           tech_stack: Array.isArray(item.tech_stack) ? item.tech_stack : [],
           description: item.description,
           challenge: item.challenge || '',
@@ -70,6 +72,7 @@ export default function AppDevelopmentFormPage() {
 
   const buildPayload = () => ({
     title: formAction?.title,
+    banner: formAction?.banner || null,
     tech_stack: Array.isArray(formAction?.tech_stack)
       ? formAction.tech_stack
       : [],
@@ -162,6 +165,15 @@ export default function AppDevelopmentFormPage() {
                 form={formAction}
                 setForm={(e: any) => setFormAction(e)}
               />
+              <div>
+                <ImageUpload
+                  label="Banner Image"
+                  value={formAction?.banner}
+                  onChange={(banner) =>
+                    setFormAction((prev: any) => ({ ...prev, banner }))
+                  }
+                />
+              </div>
               <InputForm
                 type="select"
                 name="tech_stack"

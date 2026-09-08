@@ -36,7 +36,7 @@ interface RoleItem {
   title: string
   points: string[]
   thumbnail: MatrixImage | null
-  link: string
+  wa_message: string
 }
 
 interface TalentPlacementContent {
@@ -53,7 +53,7 @@ interface TalentPlacementContent {
     title: string
     description: string
     label: string
-    link: string
+    wa_message: string
   }
 }
 
@@ -73,7 +73,7 @@ const EMPTY_CONTENT: TalentPlacementContent = {
     title: '',
     description: '',
     label: '',
-    link: '',
+    wa_message: '',
   },
 }
 
@@ -250,7 +250,7 @@ export default function TalentPlacementPageContent() {
 
   const addRole = () =>
     patch({
-      roles: [...content.roles, { title: '', points: [''], thumbnail: null, link: '' }],
+      roles: [...content.roles, { title: '', points: [''], thumbnail: null, wa_message: '' }],
     })
   const removeRole = (index: number) =>
     patch({ roles: content.roles.filter((_, i) => i !== index) })
@@ -530,7 +530,7 @@ export default function TalentPlacementPageContent() {
           active={activeSection === 'roles'}
           icon={Briefcase}
           title="Available Talent Roles"
-          description="Kartu role dinamis — thumbnail (upload), title, points[], dan link"
+          description="Kartu role dinamis — thumbnail (upload), title, points[], dan template pesan WA"
         >
           {content.roles.length === 0 ? (
             <p className="text-xs text-gray-400 py-3 text-center border border-dashed border-gray-200 rounded-lg">
@@ -629,17 +629,17 @@ export default function TalentPlacementPageContent() {
                   </div>
                   <div className="mt-3">
                     <Field
-                      label="Link"
-                      hint="URL tujuan saat card diklik (mis. /contact atau https://...). Kosongkan bila tidak butuh link."
+                      label="Template Pesan WhatsApp"
+                      hint="Tombol 'I Need This Talent' selalu membuka WhatsApp sales. Isi template pesan awal di sini (kosongkan utk memakai template default)."
                     >
-                      <input
-                        type="text"
+                      <textarea
                         className={inputCls}
-                        value={role.link}
+                        rows={3}
+                        value={role.wa_message}
                         onChange={(e) =>
-                          patchRole(roleIndex, { link: e.target.value })
+                          patchRole(roleIndex, { wa_message: e.target.value })
                         }
-                        placeholder="https://wa.me/62812... atau /contact"
+                        placeholder="Halo ExecuTrain, saya tertarik dengan talent ..."
                       />
                     </Field>
                   </div>
@@ -690,14 +690,15 @@ export default function TalentPlacementPageContent() {
               />
             </Field>
             <Field
-              label="Link CTA"
-              hint="Isi URL lengkap (https://wa.me/..., /contact, mailto:...). Kosongkan agar memakai WhatsApp default."
+              label="Template Pesan WhatsApp"
+              hint="CTA selalu membuka WhatsApp sales (nomor dari master data social media). Isi template pesan awal (kosongkan utk memakai template default)."
             >
-              <input
+              <textarea
                 className={inputCls}
-                value={content.cta.link}
-                onChange={(e) => patchCta({ link: e.target.value })}
-                placeholder="https://wa.me/62812..."
+                rows={3}
+                value={content.cta.wa_message}
+                onChange={(e) => patchCta({ wa_message: e.target.value })}
+                placeholder="Halo ExecuTrain, saya ingin konsultasi kebutuhan talent IT..."
               />
             </Field>
           </div>

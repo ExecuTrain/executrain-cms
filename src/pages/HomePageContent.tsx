@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Form } from 'antd'
-import { Save, Eye, Megaphone, Info, Sparkles, GitFork } from 'lucide-react'
+import { Save, Eye, Megaphone, Info, Sparkles } from 'lucide-react'
 import Notification from '@/components/Notification'
 import { ContentPageSkeleton } from '@/components/Skeletons'
 import PageSectionTabs from '@/components/PageSectionTabs'
-import FrameworkScopeEditor from '@/components/FrameworkScopeEditor'
 import { usePageDetail, useUpdatePage } from '@/hooks/usePage'
 
 interface ServiceItem {
@@ -21,9 +20,6 @@ interface HomeContent {
   }
   services: {
     items: ServiceItem[]
-  }
-  framework: {
-    items: Record<string, string[]>
   }
   cta: {
     title: string
@@ -48,9 +44,6 @@ const EMPTY_CONTENT: HomeContent = {
       title: '',
       description: '',
     })),
-  },
-  framework: {
-    items: {},
   },
   cta: {
     title: '',
@@ -124,7 +117,6 @@ const SECTION_TABS = [
   { key: 'hero', label: 'Hero / Jumbotron', icon: Eye },
   { key: 'about', label: 'About', icon: Info },
   { key: 'services', label: 'What We Can Do', icon: Sparkles },
-  { key: 'framework', label: 'Framework Diagram', icon: GitFork },
   { key: 'cta', label: 'CTA', icon: Megaphone },
 ]
 
@@ -178,10 +170,6 @@ export default function HomePageContent() {
     const next = [...content.services.items]
     next[index] = { ...next[index], ...partial }
     patch({ services: { items: next } })
-  }
-
-  const patchFramework = (items: Record<string, string[]>) => {
-    patch({ framework: { items } })
   }
 
   const patchCta = (partial: Partial<HomeContent['cta']>) => {
@@ -371,19 +359,6 @@ export default function HomePageContent() {
               </div>
             </div>
           ))}
-        </SectionCard>
-
-        {/* Framework Diagram */}
-        <SectionCard
-          active={activeSection === 'framework'}
-          icon={GitFork}
-          title="Framework Diagram"
-          description="Daftar item di dalam tiap scope pada wheel diagram — scope tetap, hanya item yang dinamis"
-        >
-          <FrameworkScopeEditor
-            value={content.framework.items}
-            onChange={patchFramework}
-          />
         </SectionCard>
 
         {/* CTA */}

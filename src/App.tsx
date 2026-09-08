@@ -38,6 +38,8 @@ import HomePageContent from '@/pages/HomePageContent'
 import SchedulePage from '@/pages/Schedule'
 import ScheduleFormPage from '@/pages/ScheduleForm'
 import ScheduleImportPage from '@/pages/ScheduleImport'
+import LearningPathPage from '@/pages/LearningPath'
+import LearningPathFormPage from '@/pages/LearningPathForm'
 
 function PlaceholderPage({ title }: { title: string }) {
   return (
@@ -277,6 +279,30 @@ export default function App() {
           element={
             <MenuAccessRoute path="/schedule">
               <ScheduleFormPage />
+            </MenuAccessRoute>
+          }
+        />
+        <Route
+          path="learning-path"
+          element={
+            <MenuAccessRoute path="/learning-path">
+              <LearningPathPage />
+            </MenuAccessRoute>
+          }
+        />
+        <Route
+          path="learning-path/create"
+          element={
+            <MenuAccessRoute path="/learning-path">
+              <LearningPathFormPage />
+            </MenuAccessRoute>
+          }
+        />
+        <Route
+          path="learning-path/:id/edit"
+          element={
+            <MenuAccessRoute path="/learning-path">
+              <LearningPathFormPage />
             </MenuAccessRoute>
           }
         />

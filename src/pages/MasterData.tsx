@@ -12,8 +12,9 @@ import {
 } from '@/hooks/useMasterData'
 import { useMasterData } from '@/hooks/useMasterData'
 import { MASTER_DATA_TYPES } from '@/lib/masterDataTypes'
+import { FRAMEWORK_SCOPES } from '@/lib/frameworkScopes'
 
-const emptyForm = { label: '', value: '' }
+const emptyForm = { label: '', value: '', scope: undefined as string | undefined }
 
 /** Halaman index: daftar semua tipe master data */
 function MasterDataIndex() {
@@ -87,19 +88,35 @@ function MasterDataTypePage() {
 
   const formReset = () => {
     setEditing(null)
-    setForm(emptyForm)
+    setForm({
+      ...emptyForm,
+      scope:
+        meta?.type === 'FRAMEWORK_ITEM'
+          ? FRAMEWORK_SCOPES[0]?.id
+          : undefined,
+    })
     setShowModal(false)
   }
 
   const openAdd = () => {
     setEditing(null)
-    setForm(emptyForm)
+    setForm({
+      ...emptyForm,
+      scope:
+        meta?.type === 'FRAMEWORK_ITEM'
+          ? FRAMEWORK_SCOPES[0]?.id
+          : undefined,
+    })
     setShowModal(true)
   }
 
   const openEdit = (item: any) => {
     setEditing(item)
-    setForm({ label: item.label, value: item.value })
+    setForm({
+      label: item.label,
+      value: item.value,
+      scope: item.scope ?? FRAMEWORK_SCOPES[0]?.id,
+    })
     setShowModal(true)
   }
 
@@ -108,11 +125,22 @@ function MasterDataTypePage() {
       Notification('error', 'Label and Value are required')
       return
     }
+    if (meta?.type === 'FRAMEWORK_ITEM' && !form.scope) {
+      Notification('error', 'Scope is required for Framework Diagram Item')
+      return
+    }
+    const isFramework = meta?.type === 'FRAMEWORK_ITEM'
+    const nextOrder = isFramework
+      ? items
+          .filter((i: any) => i.scope === form.scope)
+          .reduce((max: number, i: any) => Math.max(max, i.sort_order ?? 0), -1) + 1
+      : items.length
     const payload = {
       type: meta!.type,
       label: form.label.trim(),
       value: form.value.trim(),
-      sort_order: items.length,
+      scope: isFramework ? form.scope : undefined,
+      sort_order: nextOrder,
     }
 
     if (editing) {
@@ -205,6 +233,9 @@ function MasterDataTypePage() {
             <thead>
               <tr className="border-b border-gray-200 text-gray-500 uppercase text-[11px]">
                 <th className="py-2 pr-4 font-medium">Value</th>
+                {meta?.type === 'FRAMEWORK_ITEM' && (
+                  <th className="py-2 pr-4 font-medium">Scope</th>
+                )}
                 <th className="py-2 pr-4 font-medium">Label</th>
                 <th className="py-2 pr-4 font-medium">Order</th>
                 <th className="py-2 pr-4 font-medium">Created</th>
@@ -219,6 +250,13 @@ function MasterDataTypePage() {
                       {item.value}
                     </span>
                   </td>
+                  {meta?.type === 'FRAMEWORK_ITEM' && (
+                    <td className="py-2.5 pr-4 text-gray-700">
+                      {FRAMEWORK_SCOPES.find((s) => s.id === item.scope)?.label ??
+                        item.scope ??
+                        '-'}
+                    </td>
+                  )}
                   <td className="py-2.5 pr-4 text-gray-700">{item.label}</td>
                   <td className="py-2.5 pr-4 text-gray-700">{item.sort_order}</td>
                   <td className="py-2.5 pr-4 text-gray-500">
@@ -265,6 +303,26 @@ function MasterDataTypePage() {
             </div>
 
             <div className="space-y-3">
+              {meta?.type === 'FRAMEWORK_ITEM' && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    Scope
+                  </label>
+                  <select
+                    value={form.scope}
+                    onChange={(e) =>
+                      setForm((prev: any) => ({ ...prev, scope: e.target.value }))
+                    }
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-100 text-gray-900"
+                  >
+                    {FRAMEWORK_SCOPES.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
                   Value

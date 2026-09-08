@@ -9,10 +9,17 @@ import Image from '@/components/Image'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useCourse, useCourseDelete } from '@/hooks/useCourse'
 import { useMasterDataByType } from '@/hooks/useMasterData'
+import { FRAMEWORK_SCOPES } from '@/lib/frameworkScopes'
 
 function formatCategory(value: string, options: any[]) {
   const found = options.find((o) => o.value === value)
-  return found ? found.label : value?.replace(/_/g, ' ')
+  return found ? found.label || found.value : value?.replace(/_/g, ' ')
+}
+
+function formatFramework(value?: string) {
+  if (!value) return '-'
+  const found = FRAMEWORK_SCOPES.find((s) => s.id === value)
+  return found ? found.label : value
 }
 
 export default function CoursePage() {
@@ -24,7 +31,7 @@ export default function CoursePage() {
 
   const { data = [], isLoading, refetch } = useCourse(debouncedSearchName)
   const { mutate: deleteItem, isPending: deletePending } = useCourseDelete()
-  const { data: categoryData } = useMasterDataByType('COURSE_CATEGORY')
+  const { data: categoryData } = useMasterDataByType('FRAMEWORK_ITEM')
   const categoryOptions: any[] = categoryData?.data ?? []
 
   const handleDelete = async () => {
@@ -126,9 +133,12 @@ export default function CoursePage() {
 
               {/* Body */}
               <div className="p-4 flex flex-col flex-1">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary-50 text-primary-700">
                     {formatCategory(item.category, categoryOptions)}
+                  </span>
+                  <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-50 text-red-700">
+                    {formatFramework(item.framework_type)}
                   </span>
                   <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600 capitalize">
                     {item.skill_level?.toLowerCase()}
