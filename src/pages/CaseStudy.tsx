@@ -113,8 +113,16 @@ export default function CaseStudyPage() {
               className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow"
             >
               {/* Header */}
-              <div className="h-24 w-full bg-primary-600 flex items-center justify-center relative">
-                <Boxes className="w-10 h-10 text-white" />
+              <div className="h-24 w-full bg-primary-600 flex items-center justify-center relative overflow-hidden">
+                {item.banner?.url ? (
+                  <img
+                    src={item.banner.url}
+                    alt={item.title || 'banner'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Boxes className="w-10 h-10 text-white" />
+                )}
                 {item.category && (
                   <span className="absolute top-2 right-2 inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium bg-white/20 text-white">
                     {masterLabel(item.category, catOptions)}

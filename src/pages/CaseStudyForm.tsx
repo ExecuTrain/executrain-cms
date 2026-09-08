@@ -4,6 +4,7 @@ import { Form } from 'antd'
 import { ArrowLeft } from 'lucide-react'
 
 import InputForm from '@/components/Form'
+import ImageUpload from '@/components/ImageUpload'
 import Notification from '@/components/Notification'
 import { FieldRowsSkeleton } from '@/components/Skeletons'
 import TeamSizeList from '@/components/TeamSizeList'
@@ -50,6 +51,7 @@ export default function CaseStudyFormPage() {
       if (item) {
         const values = {
           title: item.title,
+          banner: item.banner && item.banner.url ? item.banner : null,
           category: item.category || undefined,
           description: item.description,
           industries: Array.isArray(item.industries) ? item.industries : [],
@@ -79,6 +81,7 @@ export default function CaseStudyFormPage() {
 
   const buildPayload = () => ({
     title: formAction?.title,
+    banner: formAction?.banner || null,
     category: formAction?.category || null,
     description: formAction?.description,
     industries: Array.isArray(formAction?.industries) ? formAction.industries : [],
@@ -243,6 +246,17 @@ export default function CaseStudyFormPage() {
                 placeholder="https://..."
                 form={formAction}
                 setForm={(e: any) => setFormAction(e)}
+              />
+            </div>
+
+            <div className="mt-4">
+              <ImageUpload
+                label="Banner Image"
+                value={formAction?.banner}
+                onChange={(banner) =>
+                  setFormAction((prev: any) => ({ ...prev, banner }))
+                }
+                folder="case-study"
               />
             </div>
 

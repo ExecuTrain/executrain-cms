@@ -13,6 +13,10 @@ export interface TestimonialItem {
 
 export interface CaseStudyPayload {
   title: string
+  banner: {
+    url: string
+    public_id: string
+  } | null
   category?: string
   description: string
   industries: string[]
