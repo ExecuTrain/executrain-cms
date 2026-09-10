@@ -15,6 +15,7 @@ export interface AppDevelopmentPayload {
   title: string
   tech_stack: string[]
   description: string
+  banner?: { url: string; public_id: string } | string | null
   challenge?: string
   team_size: TeamSizeItem[]
   timeline: number

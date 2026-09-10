@@ -2,6 +2,10 @@ import AxiosClient from '@/lib/axios'
 
 export interface ArticlePayload {
   title: string
+  banner: {
+    url: string
+    public_id: string
+  } | null
   category: string[]
   content: string
 }

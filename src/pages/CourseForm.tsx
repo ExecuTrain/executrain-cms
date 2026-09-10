@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { Form } from 'antd'
+import { Form, Select } from 'antd'
 import { ArrowLeft } from 'lucide-react'
 
 import InputForm from '@/components/Form'
@@ -14,6 +14,7 @@ import {
   useCourseDetail,
 } from '@/hooks/useCourse'
 import { useMasterDataByType } from '@/hooks/useMasterData'
+import { FRAMEWORK_SCOPES } from '@/lib/frameworkScopes'
 
 const SKILL_LEVEL_OPTIONS = [
   { label: 'Beginner', value: 'BEGINNER' },
@@ -40,14 +41,24 @@ export default function CourseFormPage() {
   )
   const { mutate: createItem, isPending: createPending } = useCourseCreate()
   const { mutate: updateItem, isPending: updatePending } = useCourseUpdate()
-  const { data: categoryData } = useMasterDataByType('COURSE_CATEGORY')
-  const { data: frameworkData } = useMasterDataByType('COURSE_FRAMEWORK')
-  const categoryOptions =
-    categoryData?.data?.map((m: any) => ({ label: m.label, value: m.value })) ??
-    []
-  const frameworkOptions =
-    frameworkData?.data?.map((m: any) => ({ label: m.label, value: m.value })) ??
-    []
+  const { data: frameworkItemData } = useMasterDataByType('FRAMEWORK_ITEM')
+
+  // Framework course = scope framework (ai/data/...).
+  const frameworkOptions = FRAMEWORK_SCOPES.map((s) => ({
+    label: s.label,
+    value: s.id,
+  }))
+
+  const selectedFramework = formAction?.framework_type
+
+  // Category course = item FRAMEWORK_ITEM di dalam scope tsb.
+  const categoryOptions = useMemo(() => {
+    const items: any[] = frameworkItemData?.data ?? []
+    const scoped = selectedFramework
+      ? items.filter((i: any) => i.scope === selectedFramework)
+      : []
+    return scoped.map((m: any) => ({ label: m.label || m.value, value: m.value }))
+  }, [frameworkItemData, selectedFramework])
 
   // Prefill saat mode edit
   useEffect(() => {
@@ -63,7 +74,9 @@ export default function CourseFormPage() {
           duration: item.duration,
           skill_level: item.skill_level,
           language: item.language,
-          framework_type: item.framework_type || 'Training',
+          framework_type: FRAMEWORK_SCOPES.some((s) => s.id === item.framework_type)
+            ? item.framework_type
+            : undefined,
           feature: Array.isArray(item.feature) ? item.feature : [],
         }
         setFormAction(values)
@@ -81,11 +94,22 @@ export default function CourseFormPage() {
     duration: formAction?.duration || 0,
     skill_level: formAction?.skill_level,
     language: formAction?.language,
-    framework_type: formAction?.framework_type || 'Training',
+    framework_type: formAction?.framework_type,
     feature: Array.isArray(formAction?.feature)
       ? formAction.feature.filter((f: string) => f.trim() !== '')
       : [],
   })
+
+  const handleFrameworkChange = (value?: string) => {
+    // Ganti framework → reset category (category course harus item di scope baru).
+    setFormAction((prev: any) => ({
+      ...prev,
+      framework_type: value,
+      category: undefined,
+    }))
+    form.setFieldValue('framework_type', value)
+    form.setFieldValue('category', undefined)
+  }
 
   const handleSubmit = async () => {
     try {
@@ -168,16 +192,53 @@ export default function CourseFormPage() {
                   }
                 />
               </div>
-              <InputForm
-                type="select"
+
+              {/* Framework (scope) */}
+              <Form.Item
+                name="framework_type"
+                label="Framework"
+                required
+                className="mb-4"
+              >
+                <Select
+                  placeholder="Select framework"
+                  value={formAction?.framework_type}
+                  onChange={handleFrameworkChange}
+                  options={frameworkOptions}
+                  size="large"
+                  className="w-full"
+                  popupClassName="rounded-xl border-gray-200 bg-white"
+                />
+              </Form.Item>
+
+              {/* Category (item dalam framework) */}
+              <Form.Item
                 name="category"
                 label="Category"
-                placeholder="Select category"
                 required
-                options={categoryOptions}
-                form={formAction}
-                setForm={(e: any) => setFormAction(e)}
-              />
+                className="mb-4"
+              >
+                <Select
+                  placeholder={
+                    selectedFramework
+                      ? 'Select category'
+                      : 'Select framework first'
+                  }
+                  value={formAction?.category}
+                  onChange={(val?: string) => {
+                    setFormAction((prev: any) => ({ ...prev, category: val }))
+                    form.setFieldValue('category', val)
+                  }}
+                  options={categoryOptions}
+                  disabled={!selectedFramework}
+                  size="large"
+                  className="w-full"
+                  popupClassName="rounded-xl border-gray-200 bg-white"
+                  showSearch
+                  optionFilterProp="label"
+                />
+              </Form.Item>
+
               <InputForm
                 type="select"
                 name="skill_level"
@@ -185,16 +246,6 @@ export default function CourseFormPage() {
                 placeholder="Select skill level"
                 required
                 options={SKILL_LEVEL_OPTIONS}
-                form={formAction}
-                setForm={(e: any) => setFormAction(e)}
-              />
-              <InputForm
-                type="select"
-                name="framework_type"
-                label="Framework Type"
-                placeholder="Select framework type"
-                required
-                options={frameworkOptions}
                 form={formAction}
                 setForm={(e: any) => setFormAction(e)}
               />

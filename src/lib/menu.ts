@@ -4,6 +4,7 @@ import {
   BookOpen,
   LayoutGrid,
   GraduationCap,
+  CalendarDays,
   Database,
   Cpu,
   Boxes,
@@ -23,6 +24,7 @@ import {
   LifeBuoy,
   Package,
   Cloud,
+  Map,
   type LucideIcon,
 } from 'lucide-react'
 import { MASTER_DATA_TYPES } from './masterDataTypes'
@@ -47,6 +49,8 @@ const MENU_ICONS: Record<string, LucideIcon> = {
   catalog: LayoutGrid,
   'skill-accelerator': BookOpen,
   course: GraduationCap,
+  schedule: CalendarDays,
+  'learning-path': Map,
   'tech-solution': Boxes,
   'it-product': Cpu,
   'app-development': AppWindow,
@@ -141,6 +145,8 @@ export const SuperMenu: MenuItem[] = [
     children: [
       { id: 31, text: 'Skill Accelerator', icon: BookOpen, href: '/skill-accelerator' },
       { id: 32, text: 'Course', icon: GraduationCap, href: '/course' },
+      { id: 34, text: 'Learning Path', icon: Map, href: '/learning-path' },
+      { id: 33, text: 'Schedule', icon: CalendarDays, href: '/schedule' },
     ],
   },
   {

@@ -31,7 +31,7 @@ interface SupportItem {
   description: string
   points: string[]
   thumbnail: ImageValue | null
-  link: string
+  wa_message: string
 }
 
 interface ImplementationSupportContent {
@@ -50,7 +50,7 @@ interface ImplementationSupportContent {
     title: string
     description: string
     label: string
-    link: string
+    wa_message: string
   }
 }
 
@@ -72,7 +72,7 @@ const EMPTY_CONTENT: ImplementationSupportContent = {
     title: '',
     description: '',
     label: '',
-    link: '',
+    wa_message: '',
   },
 }
 
@@ -227,7 +227,7 @@ export default function ImplementationSupportPageContent() {
         ...content.support,
         items: [
           ...content.support.items,
-          { title: '', description: '', points: [''], thumbnail: null, link: '' },
+          { title: '', description: '', points: [''], thumbnail: null, wa_message: '' },
         ],
       },
     })
@@ -432,7 +432,7 @@ export default function ImplementationSupportPageContent() {
           active={activeSection === 'support'}
           icon={Headphones}
           title="Support — pick up piece by piece"
-          description="Kartu dinamis — title, description, thumbnail (upload), points[], dan link"
+          description="Kartu dinamis — title, description, thumbnail (upload), points[], dan template pesan WA"
         >
           <Field label="Section Title">
             <input
@@ -549,17 +549,17 @@ export default function ImplementationSupportPageContent() {
                   </div>
                   <div className="mt-3">
                     <Field
-                      label="Link"
-                      hint="URL tujuan saat card diklik (mis. /contact atau https://...). Kosongkan bila tidak butuh link."
+                      label="Template Pesan WhatsApp"
+                      hint="Tombol 'I Need This Support' selalu membuka WhatsApp sales. Isi template pesan awal di sini (kosongkan utk memakai template default)."
                     >
-                      <input
-                        type="text"
+                      <textarea
                         className={inputCls}
-                        value={item.link}
+                        rows={3}
+                        value={item.wa_message}
                         onChange={(e) =>
-                          patchSupportItem(itemIndex, { link: e.target.value })
+                          patchSupportItem(itemIndex, { wa_message: e.target.value })
                         }
-                        placeholder="https://wa.me/62812... atau /contact"
+                        placeholder="Halo ExecuTrain, saya butuh support untuk ..."
                       />
                     </Field>
                   </div>
@@ -610,14 +610,15 @@ export default function ImplementationSupportPageContent() {
               />
             </Field>
             <Field
-              label="Link CTA"
-              hint="Isi URL lengkap (https://wa.me/..., /contact, mailto:...). Kosongkan agar memakai WhatsApp default."
+              label="Template Pesan WhatsApp"
+              hint="CTA selalu membuka WhatsApp sales (nomor dari master data social media). Isi template pesan awal (kosongkan utk memakai template default)."
             >
-              <input
+              <textarea
                 className={inputCls}
-                value={content.cta.link}
-                onChange={(e) => patchCta({ link: e.target.value })}
-                placeholder="https://wa.me/62812..."
+                rows={3}
+                value={content.cta.wa_message}
+                onChange={(e) => patchCta({ wa_message: e.target.value })}
+                placeholder="Halo ExecuTrain, saya butuh bantuan implementasi & support..."
               />
             </Field>
           </div>

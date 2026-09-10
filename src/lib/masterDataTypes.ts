@@ -1,7 +1,5 @@
 import {
   Tags,
-  Layers,
-  Frame,
   Server,
   Braces,
   GitBranch,
@@ -10,6 +8,7 @@ import {
   Lightbulb,
   Cloud,
   Newspaper,
+  Workflow,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -29,8 +28,12 @@ export interface MasterDataType {
  */
 export const MASTER_DATA_TYPES: MasterDataType[] = [
   { type: 'SKILL_CATEGORY', label: 'Skill Accelerator Category', path: 'skill-category', icon: Tags },
-  { type: 'COURSE_CATEGORY', label: 'Course Category', path: 'course-category', icon: Layers },
-  { type: 'COURSE_FRAMEWORK', label: 'Course Framework', path: 'course-framework', icon: Frame },
+  {
+    type: 'FRAMEWORK_ITEM',
+    label: 'Framework Diagram Item',
+    path: 'framework-item',
+    icon: Workflow,
+  },
   { type: 'TECH_STACK', label: 'Tech Stack (IT Product)', path: 'tech-stack', icon: Server },
   { type: 'APP_TECH_STACK', label: 'Tech Stack (App Development)', path: 'app-tech-stack', icon: Braces },
   { type: 'APP_METHODOLOGY', label: 'Methodology (App Development)', path: 'app-methodology', icon: GitBranch },

@@ -7,6 +7,7 @@ import InputForm from '@/components/Form'
 import RichTextEditor, {
   extractImageUrls,
 } from '@/components/RichTextEditor'
+import ImageUpload from '@/components/ImageUpload'
 import Notification from '@/components/Notification'
 import { FieldRowsSkeleton } from '@/components/Skeletons'
 import {
@@ -47,6 +48,7 @@ export default function ArticleFormPage() {
       if (item) {
         const values = {
           title: item.title,
+          banner: item.banner && item.banner.url ? item.banner : null,
           category: Array.isArray(item.category) ? item.category : [],
         }
         setFormAction(values)
@@ -70,6 +72,7 @@ export default function ArticleFormPage() {
 
   const buildPayload = () => ({
     title: formAction?.title,
+    banner: formAction?.banner || null,
     category: Array.isArray(formAction?.category) ? formAction.category : [],
     content: editorContent.current || '',
   })
@@ -185,6 +188,17 @@ export default function ArticleFormPage() {
                 options={catOptions}
                 form={formAction}
                 setForm={(e: any) => setFormAction(e)}
+              />
+            </div>
+
+            <div className="mt-4">
+              <ImageUpload
+                label="Banner Image"
+                value={formAction?.banner}
+                onChange={(banner) =>
+                  setFormAction((prev: any) => ({ ...prev, banner }))
+                }
+                folder="article"
               />
             </div>
 

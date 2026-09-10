@@ -5,6 +5,7 @@ export interface MasterDataItem {
   type: string
   label: string
   value: string
+  scope?: string | null
   sort_order: number
   created_at: string
   updated_at: string
@@ -45,6 +46,7 @@ export interface MasterDataPayload {
   type: string
   label: string
   value: string
+  scope?: string | null
   sort_order?: number
 }
 
