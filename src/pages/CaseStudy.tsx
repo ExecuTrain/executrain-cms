@@ -4,8 +4,10 @@ import { Search, Plus, Clock, Quote, Building2, Boxes } from 'lucide-react'
 import dayjs from 'dayjs'
 
 import Notification from '@/components/Notification'
+import Pagination from '@/components/Pagination'
 import { MediaGridSkeleton } from '@/components/Skeletons'
 import { useDebounce } from '@/hooks/useDebounce'
+import { usePagination } from '@/hooks/usePagination'
 import { useCaseStudy, useCaseStudyDelete } from '@/hooks/useCaseStudy'
 import { useMasterDataByType } from '@/hooks/useMasterData'
 
@@ -22,6 +24,16 @@ export default function CaseStudyPage() {
   const debouncedSearchName = useDebounce(searchTerm, 500)
 
   const { data = [], isLoading, refetch } = useCaseStudy(debouncedSearchName)
+
+  const {
+    paginated,
+    page,
+    setPage,
+    totalPages,
+    total,
+    from,
+    to,
+  } = usePagination(data, 9, [debouncedSearchName])
   const { mutate: deleteItem, isPending: deletePending } = useCaseStudyDelete()
   const { data: catData } = useMasterDataByType('CASE_CATEGORY')
   const { data: industryData } = useMasterDataByType('CASE_INDUSTRY')
@@ -99,15 +111,16 @@ export default function CaseStudyPage() {
       {/* Card Grid */}
       {isLoading ? (
         <MediaGridSkeleton count={3} />
-      ) : data.length === 0 ? (
+      ) : total === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 py-12 text-center text-gray-600">
           {debouncedSearchName
             ? 'No case study found matching your search'
             : 'No case study found'}
         </div>
       ) : (
+        <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.map((item: any) => (
+          {paginated.map((item: any) => (
             <div
               key={item._id}
               className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow"
@@ -228,6 +241,16 @@ export default function CaseStudyPage() {
             </div>
           ))}
         </div>
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          from={from}
+          to={to}
+          onChange={setPage}
+          label="case studies"
+        />
+        </>
       )}
 
       {/* Delete Confirmation Modal */}

@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Plus, GraduationCap, Users, Clock, Globe } from 'lucide-react'
 import dayjs from 'dayjs'
 
 import Notification from '@/components/Notification'
+import Pagination from '@/components/Pagination'
 import { MediaGridSkeleton } from '@/components/Skeletons'
 import Image from '@/components/Image'
 import { useDebounce } from '@/hooks/useDebounce'
+import { usePagination } from '@/hooks/usePagination'
 import { useCourse, useCourseDelete } from '@/hooks/useCourse'
 import { useMasterDataByType } from '@/hooks/useMasterData'
 import { FRAMEWORK_SCOPES } from '@/lib/frameworkScopes'
@@ -24,6 +26,8 @@ function formatFramework(value?: string) {
 
 export default function CoursePage() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('')
+  const [frameworkFilter, setFrameworkFilter] = useState('')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedItem, setSelectedItem] = useState<any>(null)
 
@@ -33,6 +37,29 @@ export default function CoursePage() {
   const { mutate: deleteItem, isPending: deletePending } = useCourseDelete()
   const { data: categoryData } = useMasterDataByType('FRAMEWORK_ITEM')
   const categoryOptions: any[] = categoryData?.data ?? []
+
+  // Filter klien: kategori & framework
+  const filtered = useMemo(() => {
+    const rows = Array.isArray(data) ? data : []
+    return rows.filter(
+      (item: any) =>
+        (!categoryFilter || item.category === categoryFilter) &&
+        (!frameworkFilter || item.framework_type === frameworkFilter),
+    )
+  }, [data, categoryFilter, frameworkFilter])
+
+  const hasActiveFilter =
+    Boolean(debouncedSearchName) || categoryFilter !== '' || frameworkFilter !== ''
+
+  const {
+    paginated,
+    page,
+    setPage,
+    totalPages,
+    total,
+    from,
+    to,
+  } = usePagination(filtered, 9, [debouncedSearchName, categoryFilter, frameworkFilter])
 
   const handleDelete = async () => {
     if (!selectedItem?._id) return
@@ -89,6 +116,30 @@ export default function CoursePage() {
               </button>
             )}
           </div>
+          <select
+            value={frameworkFilter}
+            onChange={(e) => setFrameworkFilter(e.target.value)}
+            className="w-40 text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          >
+            <option value="">All Frameworks</option>
+            {FRAMEWORK_SCOPES.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="w-40 text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          >
+            <option value="">All Categories</option>
+            {categoryOptions.map((o: any) => (
+              <option key={o.value} value={o.value}>
+                {o.label || o.value}
+              </option>
+            ))}
+          </select>
         </div>
         {debouncedSearchName && (
           <p className="text-xs text-gray-600 mt-2">
@@ -101,15 +152,16 @@ export default function CoursePage() {
       {/* Card Grid */}
       {isLoading ? (
         <MediaGridSkeleton count={3} />
-      ) : data.length === 0 ? (
+      ) : total === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 py-12 text-center text-gray-600">
-          {debouncedSearchName
-            ? 'No course found matching your search'
+          {hasActiveFilter
+            ? 'No course found matching your search or filters'
             : 'No course found'}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.map((item: any) => (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {paginated.map((item: any) => (
             <div
               key={item._id}
               className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow"
@@ -195,7 +247,17 @@ export default function CoursePage() {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            from={from}
+            to={to}
+            onChange={setPage}
+            label="courses"
+          />
+        </>
       )}
 
       {/* Delete Confirmation Modal */}

@@ -4,8 +4,10 @@ import { Search, Plus, Layers, Clock, ShieldCheck } from 'lucide-react'
 import dayjs from 'dayjs'
 
 import Notification from '@/components/Notification'
+import Pagination from '@/components/Pagination'
 import { MediaGridSkeleton } from '@/components/Skeletons'
 import { useDebounce } from '@/hooks/useDebounce'
+import { usePagination } from '@/hooks/usePagination'
 import { useAppDevelopment, useAppDevelopmentDelete } from '@/hooks/useAppDevelopment'
 import { useMasterDataByType } from '@/hooks/useMasterData'
 
@@ -22,6 +24,16 @@ export default function AppDevelopmentPage() {
   const debouncedSearchName = useDebounce(searchTerm, 500)
 
   const { data = [], isLoading, refetch } = useAppDevelopment(debouncedSearchName)
+
+  const {
+    paginated,
+    page,
+    setPage,
+    totalPages,
+    total,
+    from,
+    to,
+  } = usePagination(data, 9, [debouncedSearchName])
   const { mutate: deleteItem, isPending: deletePending } = useAppDevelopmentDelete()
   const { data: techData } = useMasterDataByType('APP_TECH_STACK')
   const { data: methodData } = useMasterDataByType('APP_METHODOLOGY')
@@ -95,15 +107,16 @@ export default function AppDevelopmentPage() {
       {/* Card Grid */}
       {isLoading ? (
         <MediaGridSkeleton count={3} />
-      ) : data.length === 0 ? (
+      ) : total === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 py-12 text-center text-gray-600">
           {debouncedSearchName
             ? 'No app development project found matching your search'
             : 'No app development project found'}
         </div>
       ) : (
+        <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.map((item: any) => (
+          {paginated.map((item: any) => (
             <div
               key={item._id}
               className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow"
@@ -198,6 +211,16 @@ export default function AppDevelopmentPage() {
             </div>
           ))}
         </div>
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          from={from}
+          to={to}
+          onChange={setPage}
+          label="projects"
+        />
+        </>
       )}
 
       {/* Delete Confirmation Modal */}

@@ -6,9 +6,11 @@ import dayjs from "dayjs";
 
 import InputForm from "@/components/Form";
 import Notification from "@/components/Notification";
+import Pagination from "@/components/Pagination";
 import { TableSkeleton } from "@/components/Skeletons";
 import { useAuth } from "@/lib/auth";
 import { useDebounce } from "@/hooks/useDebounce";
+import { usePagination } from "@/hooks/usePagination";
 import { useUser, useRegister, useDelete, useUpdate } from "@/hooks/useUsers";
 import { useRoleOptions } from "@/hooks/useAccess";
 
@@ -31,6 +33,16 @@ export default function UsersPage() {
   const { data: roleOptions = [] } = useRoleOptions();
 
   const { data = [], isLoading, refetch } = useUser(debouncedSearchName);
+
+  const {
+    paginated,
+    page,
+    setPage,
+    totalPages,
+    total,
+    from,
+    to,
+  } = usePagination(data, 10, [debouncedSearchName]);
   const { mutate: registerUser, isPending: registerPending } = useRegister();
   const { mutate: updateUser, isPending: updatePending } = useUpdate();
   const { mutate: deleteUser, isPending: deletePending } = useDelete();
@@ -181,7 +193,7 @@ export default function UsersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {data.length === 0 ? (
+                {total === 0 ? (
                   <tr>
                     <td colSpan={4} className="py-8 text-center text-gray-600">
                       {debouncedSearchName
@@ -190,7 +202,7 @@ export default function UsersPage() {
                     </td>
                   </tr>
                 ) : (
-                  data.map((user: any) => (
+                  paginated.map((user: any) => (
                     <tr
                       key={user._id}
                       className="hover:bg-gray-100 transition-colors !border-slate-200"
@@ -270,6 +282,17 @@ export default function UsersPage() {
                 )}
               </tbody>
             </table>
+          </div>
+          <div className="px-4 py-3 border-t border-gray-100">
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              total={total}
+              from={from}
+              to={to}
+              onChange={setPage}
+              label="users"
+            />
           </div>
         </div>
       )}

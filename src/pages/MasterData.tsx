@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, X, ChevronRight, ArrowLeft, Database } from 'luci
 import { useEffect, useState } from 'react'
 
 import Notification from '@/components/Notification'
+import Pagination from '@/components/Pagination'
 import { CardGridSkeleton, TableSkeleton } from '@/components/Skeletons'
 import {
   useMasterDataByType,
@@ -10,6 +11,7 @@ import {
   useMasterDataUpdate,
   useMasterDataDelete,
 } from '@/hooks/useMasterData'
+import { usePagination } from '@/hooks/usePagination'
 import { useMasterData } from '@/hooks/useMasterData'
 import { MASTER_DATA_TYPES } from '@/lib/masterDataTypes'
 import { FRAMEWORK_SCOPES } from '@/lib/frameworkScopes'
@@ -81,6 +83,16 @@ function MasterDataTypePage() {
   const { mutate: deleteItem, isPending: deletePending } = useMasterDataDelete()
 
   const items: any[] = data?.data ?? []
+
+  const {
+    paginated,
+    page,
+    setPage,
+    totalPages,
+    total,
+    from,
+    to,
+  } = usePagination(items, 10, [meta?.type])
 
   useEffect(() => {
     formReset()
@@ -229,6 +241,7 @@ function MasterDataTypePage() {
             No options yet for this type
           </div>
         ) : (
+          <>
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-gray-200 text-gray-500 uppercase text-[11px]">
@@ -243,7 +256,7 @@ function MasterDataTypePage() {
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
+              {paginated.map((item) => (
                 <tr key={item.id} className="border-b border-gray-100">
                   <td className="py-2.5 pr-4">
                     <span className="inline-flex px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 text-[11px] font-medium">
@@ -282,6 +295,21 @@ function MasterDataTypePage() {
               ))}
             </tbody>
           </table>
+
+          {totalPages > 1 && (
+            <div className="pt-4">
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                total={total}
+                from={from}
+                to={to}
+                onChange={setPage}
+                label="options"
+              />
+            </div>
+          )}
+          </>
         )}
       </div>
 
