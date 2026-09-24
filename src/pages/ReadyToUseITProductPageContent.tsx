@@ -28,7 +28,7 @@ interface ReadyToUseITProductContent {
     title: string
     description: string
     label: string
-    link: string
+    wa_message: string
   }
 }
 
@@ -50,7 +50,7 @@ const EMPTY_CONTENT: ReadyToUseITProductContent = {
     title: '',
     description: '',
     label: '',
-    link: '',
+    wa_message: '',
   },
 }
 
@@ -379,14 +379,15 @@ export default function ReadyToUseITProductPageContent() {
               />
             </Field>
             <Field
-              label="Link CTA"
-              hint="Isi URL lengkap (https://wa.me/..., /contact, mailto:...). Kosongkan agar memakai WhatsApp default."
+              label="Template Pesan WhatsApp"
+              hint="CTA selalu membuka WhatsApp sales (nomor dari master data social media). Isi template pesan awal (kosongkan utk memakai template default)."
             >
-              <input
+              <textarea
                 className={inputCls}
-                value={content.cta.link}
-                onChange={(e) => patchCta({ link: e.target.value })}
-                placeholder="https://wa.me/62812..."
+                rows={3}
+                value={content.cta.wa_message}
+                onChange={(e) => patchCta({ wa_message: e.target.value })}
+                placeholder="Halo ExecuTrain, saya tertarik dan ingin tahu lebih lanjut..."
               />
             </Field>
           </div>
