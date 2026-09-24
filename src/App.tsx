@@ -26,6 +26,7 @@ import ContentManagementPage from '@/pages/ContentManagement'
 import AboutPage from '@/pages/AboutPage'
 import SkillAcceleratorPageContent from '@/pages/SkillAcceleratorPageContent'
 import CourseCatalogPageContent from '@/pages/CourseCatalogPageContent'
+import SchedulePageContent from '@/pages/SchedulePageContent'
 import TechAdvisoryPageContent from '@/pages/TechAdvisoryPageContent'
 import TalentPlacementPageContent from '@/pages/TalentPlacementPageContent'
 import ImplementationSupportPageContent from '@/pages/ImplementationSupportPageContent'
@@ -331,6 +332,14 @@ export default function App() {
           element={
             <MenuAccessRoute path="/course-catalog-page">
               <CourseCatalogPageContent />
+            </MenuAccessRoute>
+          }
+        />
+        <Route
+          path="schedule-page"
+          element={
+            <MenuAccessRoute path="/schedule-page">
+              <SchedulePageContent />
             </MenuAccessRoute>
           }
         />

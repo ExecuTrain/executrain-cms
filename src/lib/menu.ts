@@ -63,6 +63,7 @@ const MENU_ICONS: Record<string, LucideIcon> = {
   about: Info,
   'skill-accelerator-page': Zap,
   'course-catalog-page': GraduationCap,
+  'schedule-page': CalendarDays,
   'tech-advisory-page': Compass,
   'talent-placement-page': UsersRound,
   'implementation-support-page': LifeBuoy,
