@@ -4,8 +4,10 @@ import { Search, Plus, Newspaper, CalendarDays } from 'lucide-react'
 import dayjs from 'dayjs'
 
 import Notification from '@/components/Notification'
+import Pagination from '@/components/Pagination'
 import { MediaGridSkeleton } from '@/components/Skeletons'
 import { useDebounce } from '@/hooks/useDebounce'
+import { usePagination } from '@/hooks/usePagination'
 import { useArticle, useArticleDelete } from '@/hooks/useArticle'
 import { useMasterDataByType } from '@/hooks/useMasterData'
 
@@ -28,6 +30,16 @@ export default function ArticlePage() {
   const debouncedSearchName = useDebounce(searchTerm, 500)
 
   const { data = [], isLoading, refetch } = useArticle(debouncedSearchName)
+
+  const {
+    paginated,
+    page,
+    setPage,
+    totalPages,
+    total,
+    from,
+    to,
+  } = usePagination(data, 9, [debouncedSearchName])
   const { mutate: deleteItem, isPending: deletePending } = useArticleDelete()
   const { data: catData } = useMasterDataByType('ARTICLE_CATEGORY')
   const catOptions: any[] = catData?.data ?? []
@@ -99,15 +111,16 @@ export default function ArticlePage() {
       {/* Card Grid */}
       {isLoading ? (
         <MediaGridSkeleton count={3} />
-      ) : data.length === 0 ? (
+      ) : total === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 py-12 text-center text-gray-600">
           {debouncedSearchName
             ? 'No article found matching your search'
             : 'No article found'}
         </div>
       ) : (
+        <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.map((item: any) => (
+          {paginated.map((item: any) => (
             <div
               key={item._id}
               className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow"
@@ -175,6 +188,16 @@ export default function ArticlePage() {
             </div>
           ))}
         </div>
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          from={from}
+          to={to}
+          onChange={setPage}
+          label="articles"
+        />
+        </>
       )}
 
       {/* Delete Confirmation Modal */}

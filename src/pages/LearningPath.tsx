@@ -4,8 +4,10 @@ import { Search, Plus, Map, Layers, Route } from 'lucide-react'
 import dayjs from 'dayjs'
 
 import Notification from '@/components/Notification'
+import Pagination from '@/components/Pagination'
 import { MediaGridSkeleton } from '@/components/Skeletons'
 import { useDebounce } from '@/hooks/useDebounce'
+import { usePagination } from '@/hooks/usePagination'
 import { useLearningPath, useLearningPathDelete } from '@/hooks/useLearningPath'
 import { FRAMEWORK_SCOPES } from '@/lib/frameworkScopes'
 
@@ -18,6 +20,16 @@ export default function LearningPathPage() {
 
   const { data = [], isLoading, refetch } = useLearningPath(debouncedSearchName)
   const { mutate: deleteItem, isPending: deletePending } = useLearningPathDelete()
+
+  const {
+    paginated,
+    page,
+    setPage,
+    totalPages,
+    total,
+    from,
+    to,
+  } = usePagination(data, 9, [debouncedSearchName])
 
   const scopeLabel = (scope?: string) =>
     FRAMEWORK_SCOPES.find((s) => s.id === scope)?.label ?? scope ?? '-'
@@ -88,15 +100,16 @@ export default function LearningPathPage() {
       {/* Card Grid */}
       {isLoading ? (
         <MediaGridSkeleton count={3} />
-      ) : data.length === 0 ? (
+      ) : total === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 py-12 text-center text-gray-600">
           {debouncedSearchName
             ? 'No learning path found matching your search'
             : 'No learning path found'}
         </div>
       ) : (
+        <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.map((item: any) => {
+          {paginated.map((item: any) => {
             const stageCount = Array.isArray(item.stages) ? item.stages.length : 0
             const courseCount = Array.isArray(item.stages)
               ? item.stages.reduce((acc: number, s: any) => acc + (Array.isArray(s.course_ids) ? s.course_ids.length : 0), 0)
@@ -167,6 +180,16 @@ export default function LearningPathPage() {
             )
           })}
         </div>
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          from={from}
+          to={to}
+          onChange={setPage}
+          label="learning paths"
+        />
+        </>
       )}
 
       {/* Delete Confirmation Modal */}

@@ -1,0 +1,305 @@
+import { useState, useEffect } from 'react'
+import { Form } from 'antd'
+import { Save, Eye, Megaphone } from 'lucide-react'
+import Notification from '@/components/Notification'
+import { ContentPageSkeleton } from '@/components/Skeletons'
+import PageSectionTabs from '@/components/PageSectionTabs'
+import { usePageDetail, useUpdatePage } from '@/hooks/usePage'
+
+/** Shape konten halaman Schedule (dicocokkan dengan compro). */
+interface ScheduleContent {
+  title_page: string
+  description_page: string
+  cta: {
+    title: string
+    description: string
+    label: string
+    wa_message: string
+  }
+}
+
+const PAGE_CODE = 'schedule'
+
+const EMPTY_CONTENT: ScheduleContent = {
+  title_page: '',
+  description_page: '',
+  cta: {
+    title: '',
+    description: '',
+    label: '',
+    wa_message: '',
+  },
+}
+
+function SectionCard({
+  icon: Icon,
+  title,
+  description,
+  active = true,
+  children,
+}: {
+  icon: any
+  title: string
+  description?: string
+  active?: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <div
+      className={`bg-white rounded-2xl border border-gray-200 overflow-hidden ${
+        active ? '' : 'hidden'
+      }`}
+    >
+      <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
+        <div className="w-9 h-9 rounded-xl bg-primary-50 flex items-center justify-center">
+          <Icon className="w-4.5 h-4.5 text-primary-600" />
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+          {description && (
+            <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+          )}
+        </div>
+      </div>
+      <div className="p-6 space-y-4">{children}</div>
+    </div>
+  )
+}
+
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string
+  hint?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-gray-700 mb-1.5">
+        {label}
+      </label>
+      {children}
+      {hint && <p className="text-[11px] text-gray-400 mt-1">{hint}</p>}
+    </div>
+  )
+}
+
+const inputCls =
+  'w-full px-3.5 py-2 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900'
+const textareaCls =
+  'w-full px-3.5 py-2 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-gray-900 resize-y'
+
+const SECTION_TABS = [
+  { key: 'hero', label: 'Hero / Jumbotron', icon: Eye },
+  { key: 'cta', label: 'CTA', icon: Megaphone },
+]
+
+export default function SchedulePageContent() {
+  const [form] = Form.useForm()
+  const [content, setContent] = useState<ScheduleContent>(EMPTY_CONTENT)
+  const [hasChanges, setHasChanges] = useState(false)
+  const [activeSection, setActiveSection] = useState('hero')
+
+  const { data: page, isLoading, refetch } = usePageDetail(PAGE_CODE)
+  const { mutate: update, isPending } = useUpdatePage(PAGE_CODE)
+
+  useEffect(() => {
+    if (page) {
+      const merged: ScheduleContent = {
+        ...EMPTY_CONTENT,
+        ...(page.content || {}),
+        cta: { ...EMPTY_CONTENT.cta, ...(page.content?.cta || {}) },
+      }
+      form.setFieldsValue({ ...merged, cta: undefined })
+      setContent(merged)
+      setHasChanges(false)
+    }
+  }, [page, form])
+
+  const patch = (partial: Partial<ScheduleContent>) => {
+    setContent((prev) => ({ ...prev, ...partial }))
+    setHasChanges(true)
+  }
+
+  const patchCta = (partial: Partial<ScheduleContent['cta']>) => {
+    setContent((prev) => ({ ...prev, cta: { ...prev.cta, ...partial } }))
+    setHasChanges(true)
+  }
+
+  const buildMerged = (): ScheduleContent => ({
+    ...EMPTY_CONTENT,
+    ...(page?.content || {}),
+    cta: { ...EMPTY_CONTENT.cta, ...(page?.content?.cta || {}) },
+  })
+
+  const handleSubmit = async () => {
+    try {
+      await form.validateFields()
+      update(
+        { title: page?.title ?? 'Schedule', content },
+        {
+          onSuccess: () => {
+            Notification('success', 'Schedule page updated successfully')
+            setHasChanges(false)
+            refetch()
+          },
+          onError: (error: any) => {
+            Notification('error', error.message || 'Failed to update Schedule page')
+          },
+        },
+      )
+    } catch {
+      Notification('error', 'Please fill in all required fields')
+    }
+  }
+
+  if (isLoading) {
+    return <ContentPageSkeleton />
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Schedule Page</h1>
+          <p className="text-xs text-gray-600 mt-0.5">
+            Manage Schedule page copywriting — hero and CTA
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isPending}
+          className="flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isPending ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="w-5 h-5" />
+              Save Changes
+            </>
+          )}
+        </button>
+      </div>
+
+      {hasChanges && (
+        <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4 flex items-start gap-3">
+          <div className="flex-1">
+            <h4 className="text-sm font-semibold text-yellow-900 mb-1">
+              Unsaved Changes
+            </h4>
+            <p className="text-sm text-yellow-800">
+              You have unsaved changes. Click "Save Changes" to persist your
+              modifications.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (page) {
+                const merged = buildMerged()
+                form.setFieldsValue({ ...merged, cta: undefined })
+                setContent(merged)
+              }
+              setHasChanges(false)
+            }}
+            className="text-yellow-600 hover:text-yellow-800 transition-colors text-sm font-medium"
+          >
+            Discard
+          </button>
+        </div>
+      )}
+
+      <PageSectionTabs
+        items={SECTION_TABS}
+        activeKey={activeSection}
+        onChange={setActiveSection}
+      />
+
+      <Form form={form} layout="vertical" requiredMark={false}>
+        {/* Hero (Jumbotron) */}
+        <SectionCard
+          active={activeSection === 'hero'}
+          icon={Eye}
+          title="Hero / Jumbotron"
+          description="Tampil di bagian paling atas halaman Schedule"
+        >
+          <Field label="Title Page">
+            <input
+              className={inputCls}
+              value={content.title_page}
+              onChange={(e) => patch({ title_page: e.target.value })}
+              placeholder="Class Schedule"
+            />
+          </Field>
+          <Field
+            label="Description Page"
+            hint="Gunakan baris baru (Enter) untuk membuat paragraf baru."
+          >
+            <textarea
+              rows={3}
+              className={textareaCls}
+              value={content.description_page}
+              onChange={(e) => patch({ description_page: e.target.value })}
+              placeholder="Find the perfect date for your next training..."
+            />
+          </Field>
+        </SectionCard>
+
+        {/* CTA */}
+        <SectionCard
+          active={activeSection === 'cta'}
+          icon={Megaphone}
+          title="CTA"
+          description="Call-to-action di akhir halaman Schedule"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field label="Title CTA">
+              <input
+                className={inputCls}
+                value={content.cta.title}
+                onChange={(e) => patchCta({ title: e.target.value })}
+                placeholder="Can't Find a Suitable Date?"
+              />
+            </Field>
+            <Field label="Description CTA">
+              <input
+                className={inputCls}
+                value={content.cta.description}
+                onChange={(e) => patchCta({ description: e.target.value })}
+                placeholder="Request a custom schedule and our team will arrange it for you."
+              />
+            </Field>
+            <Field label="Label CTA">
+              <input
+                className={inputCls}
+                value={content.cta.label}
+                onChange={(e) => patchCta({ label: e.target.value })}
+                placeholder="Request Schedule"
+              />
+            </Field>
+            <Field
+              label="Template Pesan WhatsApp"
+              hint="CTA selalu membuka WhatsApp sales (nomor dari master data social media). Isi template pesan awal (kosongkan utk memakai template default)."
+            >
+              <textarea
+                className={inputCls}
+                rows={3}
+                value={content.cta.wa_message}
+                onChange={(e) => patchCta({ wa_message: e.target.value })}
+                placeholder="Halo ExecuTrain, saya tertarik dan ingin tahu lebih lanjut..."
+              />
+            </Field>
+          </div>
+        </SectionCard>
+      </Form>
+    </div>
+  )
+}

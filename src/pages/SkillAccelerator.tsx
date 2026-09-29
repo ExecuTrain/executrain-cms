@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Plus, BookOpen, Users, Clock, Globe } from 'lucide-react'
 import dayjs from 'dayjs'
 
 import Notification from '@/components/Notification'
+import Pagination from '@/components/Pagination'
 import { MediaGridSkeleton } from '@/components/Skeletons'
 import Image from '@/components/Image'
 import { useDebounce } from '@/hooks/useDebounce'
+import { usePagination } from '@/hooks/usePagination'
 import { useSkillAccelerator, useSkillAcceleratorDelete } from '@/hooks/useSkillAccelerator'
 import { useMasterDataByType } from '@/hooks/useMasterData'
 
@@ -17,6 +19,7 @@ function formatCategory(value: string, options: any[]) {
 
 export default function SkillAcceleratorPage() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedItem, setSelectedItem] = useState<any>(null)
   const { data: categoryData } = useMasterDataByType('SKILL_CATEGORY')
@@ -26,6 +29,26 @@ export default function SkillAcceleratorPage() {
 
   const { data = [], isLoading, refetch } = useSkillAccelerator(debouncedSearchName)
   const { mutate: deleteItem, isPending: deletePending } = useSkillAcceleratorDelete()
+
+  // Filter klien: kategori
+  const filtered = useMemo(() => {
+    const rows = Array.isArray(data) ? data : []
+    return rows.filter(
+      (item: any) => !categoryFilter || item.category === categoryFilter,
+    )
+  }, [data, categoryFilter])
+
+  const hasActiveFilter = Boolean(debouncedSearchName) || categoryFilter !== ''
+
+  const {
+    paginated,
+    page,
+    setPage,
+    totalPages,
+    total,
+    from,
+    to,
+  } = usePagination(filtered, 9, [debouncedSearchName, categoryFilter])
 
   const handleDelete = async () => {
     if (!selectedItem?._id) return
@@ -82,6 +105,18 @@ export default function SkillAcceleratorPage() {
               </button>
             )}
           </div>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="w-40 text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          >
+            <option value="">All Categories</option>
+            {categoryOptions.map((o: any) => (
+              <option key={o.value} value={o.value}>
+                {o.label || o.value}
+              </option>
+            ))}
+          </select>
         </div>
         {debouncedSearchName && (
           <p className="text-xs text-gray-600 mt-2">
@@ -94,15 +129,16 @@ export default function SkillAcceleratorPage() {
       {/* Card Grid */}
       {isLoading ? (
         <MediaGridSkeleton count={3} />
-      ) : data.length === 0 ? (
+      ) : total === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 py-12 text-center text-gray-600">
-          {debouncedSearchName
-            ? 'No skill accelerator found matching your search'
+          {hasActiveFilter
+            ? 'No skill accelerator found matching your search or filters'
             : 'No skill accelerator found'}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.map((item: any) => (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {paginated.map((item: any) => (
             <div
               key={item._id}
               className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow"
@@ -185,7 +221,17 @@ export default function SkillAcceleratorPage() {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            from={from}
+            to={to}
+            onChange={setPage}
+            label="programs"
+          />
+        </>
       )}
 
       {/* Delete Confirmation Modal */}
